@@ -1,0 +1,47 @@
+class Extract:
+    def initialisations:
+        self.csvfiles = a list of the csvfiles
+        self.jsonfiles = a list of the jsonfiles
+        self.csv_dataframes = []
+        self.json_dataframes = []
+
+    def retrieve_csv_filenames:
+        items_in_bucket = [item['Key'] for item in bucket_contents['Contents']]
+        self.csvfiles = An fnmatch.filter (i.e. a wildcard) for *.csv
+
+
+        def retrieve_json_filenames:
+        items_in_bucket = [item['Key'] for item in bucket_contents['Contents']]
+        self.jsonfiles = An fnmatch.filter (i.e. a wildcard) for *.json
+
+
+    def csv_to_dataframe:
+        for file in self.csvfiles:
+            key = file (this sets the key to be its own name)
+            s3_object = s3_client.get_object(
+                specify the object parameters here
+                i.e.
+                Bucket=bucket_name,
+                Key=key)
+            Then we convert the file into a pandas dataframe:
+            file = pd.read_csv(s3_object['Body'])
+            Append file to csv_dataframes
+
+    def json_to_dataframe:
+        A method similar to csv_to_dataframes where for file in the jsonfiles list,
+        you take the body, convert it to a dataframe and
+        then append it to the json dataframes list
+
+
+    def add_name_column_to_dataframe:
+        For each dataframe in the csv / json list, add a column for the file name
+
+    An example of what is trying to be achieved:
+     1     2    3     4(Column name)
+     becky 50% Data (12202.json)
+     With the filename, you can then query them, to check if they are in there database or not
+     for when you want to add features to check if data already in there of if it needs updating
+
+
+
+
