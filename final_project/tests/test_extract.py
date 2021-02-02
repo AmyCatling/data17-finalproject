@@ -1,6 +1,7 @@
-
+import pytest
 import pandas as pd
-from final_project.extract import *
+from final_project.extract import Extract
+
 
 extract = Extract()
 # def test_academy_is_df():

@@ -9,6 +9,10 @@ class Extract:
     def __init__(self):
         self.csv_file_names_list = []
         self.json_file_names_list = []
+        self.csv_applicants_names_list = []
+        self.txt_file_names_list = []
+
+        self.txt_file_names_list = []
         self.csv_df_list = []
         self.json_dict_list = []
         self.academy_df = None
@@ -24,18 +28,31 @@ class Extract:
     def all_data_loader(self):
         self.retrieve_json_file_names()
         self.retrieve_csv_file_names()
+        # self.retrieve_applicants_csv_file_names()
+        # self.retrieve_txt_file_names()
 
     def retrieve_csv_file_names(self):
         items_in_bucket = [item['Key'] for item in bucket_contents['Contents']]
         self.csv_file_names_list = fnmatch.filter(items_in_bucket, '*.csv')
         print(f"A total of {len(self.csv_file_names_list)} csv files were found in Amazon S3")
-        self.csv_to_df()
+        # self.csv_to_df()
 
     def retrieve_json_file_names(self):
         items_in_bucket = [item['Key'] for item in bucket_contents['Contents']]
         self.json_file_names_list = fnmatch.filter(items_in_bucket, '*.json')
         print(f"A total of {len(self.json_file_names_list)} json files were found in Amazon S3")
-        self.json_to_df()
+        # self.json_to_df()
+
+    # def retrieve_applicants_csv_file_names(self):
+    #     items_in_bucket = [item['Key'] for item in bucket_contents['Contents']]
+    #     self.csv_applicants_names_list = fnmatch.filter(items_in_bucket, '*cants.csv')
+    #     print(f"A total of {len(self.csv_applicants_names_list)} applicant csv files were found in Amazon S3")
+    #
+    # def retrieve_txt_file_names(self):
+    #     items_in_bucket = [item['Key'] for item in bucket_contents['Contents']]
+    #     self.txt_file_names_list = fnmatch.filter(items_in_bucket, '*.txt')
+    #     print(f"A total of {len(self.csv_file_names_list)} text files were found in Amazon S3")
+
 
     def csv_to_df(self):
         for file in self.csv_file_names_list:
@@ -63,7 +80,7 @@ class Extract:
 
 
 instance = Extract()
-print(instance.academy_df)
+# print(instance.academy_df)
 # instance.data_checker()
 
 
