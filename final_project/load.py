@@ -29,6 +29,7 @@ class LoadData:
 
             try:  # get a talent_id from the Talent table
                 get_talent_id = self.conn.execute("SELECT talent_id FROM Talent WHERE talent_name = ? ", row.name)
+                talent_id = get_talent_id.fetchone()
             except TypeError:
                 print("This person was not present at the talent day")
 
@@ -117,7 +118,7 @@ class LoadData:
                               row.Analytic_W9, row.Independent_W9, row.Determined_W9, row.Professional_W9,
                               row.Studious_W9, row.Imginative_W9,
                               row.Analytic_W10, row.Independent_W10, row.Determined_W10, row.Professional_W10,
-                              row.Studious_W10, row.Imginative_W10, row.course_name, row.active, get_talent_id)
+                              row.Studious_W10, row.Imginative_W10, row.course_name, row.active, talent_id)
         self.conn.commit()
 
 
