@@ -1,4 +1,4 @@
-import pytest
+
 import pandas as pd
 from final_project.extract import *
 
@@ -21,8 +21,6 @@ def test_json_file_name_in_list():
     assert len(extract.json_file_names_list) > 0
     for file in extract.json_file_names_list:
         assert 'json' in file
-
-
 
 
 

@@ -16,14 +16,13 @@ class Extract:
         self.all_data_loader()
 
 
-
     def data_checker(self):
         pass
         # if data in SQL, continue
         # if not in sql, append data to csv_file_names_list and same for json in json_file_names_list
 
     def all_data_loader(self):
-        # self.retrieve_json_file_names()
+        self.retrieve_json_file_names()
         self.retrieve_csv_file_names()
 
     def retrieve_csv_file_names(self):
