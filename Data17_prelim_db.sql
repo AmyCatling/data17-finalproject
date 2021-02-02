@@ -82,6 +82,7 @@ CREATE TABLE Academy(
     studious_w10 INT,
     imaginative_w10 INT,
     course_name VARCHAR(100),
+    active BIT,
     talent_id  INT NOT NULL FOREIGN KEY REFERENCES Talent(talent_id)
  
 )
