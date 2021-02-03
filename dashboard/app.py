@@ -78,7 +78,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
 
     html.Div([
         dcc.Dropdown(
-                multi=True,
+                #multi=True,
             id='student',
             options=[{'label': i, 'value': i} for i in available_indicators],
             value=available_indicators[0],

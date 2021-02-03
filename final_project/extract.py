@@ -7,7 +7,7 @@ import boto3
 
 
 class Extract:
-    def __init__(self):
+    def __init__(self, filechoice, devcounter=False):
         self.bucket_contents = []
         self.get_bucket_contents()
         self.csv_file_names_list = []
@@ -16,6 +16,8 @@ class Extract:
         self.json_dict_list = []
         self.academy_df = None
         self.talent_df = None
+        self.filechoice = filechoice
+        self.devcounter = devcounter
         #self.all_data_loader()
         # self.create_csv()
 
@@ -37,8 +39,14 @@ class Extract:
                 break
 
     def all_data_loader(self):
-        #self.retrieve_json_file_names()
-        self.retrieve_csv_file_names()
+        if self.filechoice == 'json':
+            self.retrieve_json_file_names()
+        elif self.filechoice == 'csv':
+            self.retrieve_csv_file_names()
+        elif self.filechoice == 'all':
+            self.retrieve_json_file_names()
+            self.retrieve_csv_file_names()
+
 
     def retrieve_csv_file_names(self):
         items_in_bucket = [item['Key'] for item in self.bucket_contents]
@@ -74,11 +82,17 @@ class Extract:
             elif 'Engineering' in key:
                 df['course_name'] = key[slice(8, 22)]
                 df['date'] = key[slice(23, 33)]
+            for column in df:
+                df[column].fillna(101, inplace=True) ###REMOVE IF THIS BREAKS ANYTHING
             self.csv_df_list.append(df)
         self.academy_df = pd.concat(self.csv_df_list)
 
     def json_to_df(self):
-        for file in self.json_file_names_list:
+        count = 0
+        # for file in self.json_file_names_list:
+        for file in self.json_file_names_list[1000:1100]:
+            if self.devcounter and count%10 == 0:
+                print(count)
             key = file
             s3_object = s3_client.get_object(Bucket=bucket_name, Key=key)
             file = s3_object['Body']
@@ -87,6 +101,7 @@ class Extract:
             jsondf.insert(0, 'original_file_name', '')
             jsondf['original_file_name'] = key
             self.json_dict_list.append(jsondf)
+            count+=1
         self.talent_df = pd.concat(self.json_dict_list)
 
     def create_csv(self):

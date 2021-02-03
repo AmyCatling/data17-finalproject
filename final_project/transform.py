@@ -70,10 +70,14 @@ class Transform_csv():
 # test_case_csv = Transform_csv()
 
 class Transform_json():
-    def __init__(self):
-        f = open("C:/Users/joest/Downloads/10383.json")
-        j = json.load(f)
-        self.talent_df = pd.DataFrame([j])
+    def __init__(self, talent_df):
+        # f = open("C:/Users/joest/Downloads/10383.json")
+        # j = json.load(f)
+        # self.talent_df = pd.DataFrame([j])
+        self.talent_df = talent_df
+        #self.json_active_bits()
+        self.fix_nulls()
+        #self.date_types_changed()
 
         # self.json_active_bits()
         # self.date_types_changed()
@@ -92,14 +96,15 @@ class Transform_json():
 
         for column in relevant_columns:
             for index, entry in enumerate(self.talent_df[column]):
-                self.talent_df[column].replace({'Yes': True, 'No': False, 'Pass': True, 'Fail': False})
-                # if entry == 'Yes' or entry == 'Pass':
-                #     self.talent_df[column][index] = True
-                # elif entry == 'No' or entry == 'Fail':
-                #     self.talent_df[column][index] = False
+                #self.talent_df[column].replace({'Yes': True, 'No': False, 'Pass': True, 'Fail': False})
+                if entry == 'Yes' or entry == 'Pass':
+                    self.talent_df[column][index] = 'True'
+                elif entry == 'No' or entry == 'Fail':
+                    self.talent_df[column][index] = 'False'
             self.talent_df[column] = self.talent_df[column].astype(bool)  # ignore me
 
-
+    def fix_nulls(self):
+        self.talent_df['tech_self_score'].fillna('None', inplace=True)
 
     def date_types_changed(self):
         new_dates = []
@@ -107,6 +112,14 @@ class Transform_json():
 
             new_dates.append(datetime.datetime.strptime(i, '%d/%m/%Y').date())
         print(type(new_dates[0]))
+
+
+    #iterate through string columns and encode them inplace
+
+
+
+
+
 
 
 
