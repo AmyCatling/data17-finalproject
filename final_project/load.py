@@ -1,5 +1,5 @@
 #from final_project.transform import Transform
-import final_project.config
+from final_project.config import *
 import pyodbc
 import pandas as pd
 
@@ -8,8 +8,8 @@ class LoadData:
 
     def __init__(self):  # initialisation
         self.conn = pyodbc.connect(
-            'DRIVER={ODBC Driver 17 for SQL Server};SERVER=' + config.server +
-            ';DATABASE=' + config.database + ';UID=' + config.username + ';PWD=' + config.password)
+            'DRIVER={ODBC Driver 17 for SQL Server};SERVER=' + server +
+            ';DATABASE=' + database + ';UID=' + username + ';PWD=' + password)
         #self.talent_df = talent_df
         #self.academy_df = academy_df
 
