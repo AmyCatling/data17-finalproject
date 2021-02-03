@@ -1,5 +1,4 @@
 from final_project.load import LoadData
-import pytest
 
 def test_connection():
     loading = LoadData()

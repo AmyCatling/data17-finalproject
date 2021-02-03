@@ -1,5 +1,5 @@
 #from final_project.transform import Transform
-import config
+import final_project.config
 import pyodbc
 import pandas as pd
 
