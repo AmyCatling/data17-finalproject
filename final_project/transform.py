@@ -1,9 +1,11 @@
 #!!!!!CHECK INDECIES WITH NEW DATAFRAMES!!!!!
-#Tests need refactoring to account for new columns
+#Check final dates
 
 
+import json
 import pandas as pd
-
+import numpy as np
+import datetime
 """
 Variables:
 self.csv_file_names_list - a list of the names of csvs we iterate through
@@ -20,15 +22,15 @@ self.academy_df -
 class Transform_csv():
     def __init__(self):
         #This is a temporary filepath, will inheret filepath
-        self.academy_df = pd.read_csv("C:/Users/willi/Downloads/Business_20_2019-02-11.csv")
+        self.academy_df = pd.read_csv("C:/Users/joest/Downloads/Data_29_2019-03-04.csv")
         #super().__init__()
         if __name__ == '__main__':
             self.add_columns()
             self.active_nulls()
             self.null_rename()
             self.floats_to_ints()
+            self.deactive_nulls()
             print(self.academy_df.to_string())
-
 
 
     def add_columns(self):
@@ -54,12 +56,65 @@ class Transform_csv():
             if "_W" in column:
                 self.academy_df[column] = self.academy_df[column].astype(int)
 
+    def deactive_nulls(self):
 
-test_case_csv = Transform_csv()
+        self.academy_df = self.academy_df.replace(99, 0)
+
+
+# test_case_csv = Transform_csv()
 
 class Transform_json():
     def __init__(self):
-        self.talent_df = pd.read_json("C:/Users/willi/Downloads/10383.json")
+        f = open("C:/Users/joest/Downloads/10383.json")
+        j = json.load(f)
+        self.talent_df = pd.DataFrame([j])
+
+        # self.json_active_bits()
+        # self.date_types_changed()
+        # print(self.talent_df.dtypes)
         #Incomplete
+
+
+
+    def json_active_bits(self):
+
+        # final_index = self.academy_df.columns[-1]
+        # self.academy_df.loc[self.academy_df[final_index] == 99, "Active"] = "N"
+        relevant_columns = ['self_development','geo_flex','financial_support_self', 'result']
+
+        # self.talent_df.loc[self.talent_df[relevant_columns] == 'Yes'] = True
+
+        for column in relevant_columns:
+            for index, entry in enumerate(self.talent_df[column]):
+                self.talent_df[column].replace({'Yes': True, 'No': False, 'Pass': True, 'Fail': False})
+                # if entry == 'Yes' or entry == 'Pass':
+                #     self.talent_df[column][index] = True
+                # elif entry == 'No' or entry == 'Fail':
+                #     self.talent_df[column][index] = False
+            self.talent_df[column] = self.talent_df[column].astype(bool)  # ignore me
+
+
+
+    def date_types_changed(self):
+        new_dates = []
+        for i in self.talent_df['date']:
+
+            new_dates.append(datetime.datetime.strptime(i, '%d/%m/%Y').date())
+        print(type(new_dates[0]))
+
+
+
+if __name__ == '__main__':
+    test = Transform_json()
+    test.talent_df['self_development'] = 'No'
+    print(test.talent_df.to_string())
+    test.json_active_bits()
+    print(test.talent_df.to_string())
+    print(test.talent_df['geo_flex'].dtype)
+    # test.date_types_changed()
+
+
+
+
 
 
