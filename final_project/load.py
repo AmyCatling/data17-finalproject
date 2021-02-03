@@ -10,13 +10,13 @@ class LoadData:
         self.conn = pyodbc.connect(
             'DRIVER={ODBC Driver 17 for SQL Server};SERVER=' + server +
             ';DATABASE=' + database + ';UID=' + username + ';PWD=' + password)
-        #self.talent_df = talent_df
-        #self.academy_df = academy_df
+        # self.talent_df = talent_df
+        # self.academy_df = academy_df
 
         print(self.conn)
 
     def import_talent_data(self):  # import talent team data
-        for index, row in self.talent_df.itterrows():
+        for index, row in self.talent_df.iterrows():
             self.conn.execute('INSERT INTO Talent(talent_name, assessment_day, known_technologies,\
                               strengths, weaknesses, self_development, geo_flexible, financial_support_self,\
                               result, course_interest) VALUES (?,?,?,?,?,?,?,?,?,?)', row.name, row.date,
@@ -25,7 +25,7 @@ class LoadData:
         self.conn.commit()
 
     def import_academy_data(self):  # import academy data
-        for index, row in self.academy_df.itterrows():  # iterate through academy df
+        for index, row in self.academy_df.iterrows():  # iterate through academy df
 
             try:  # get a talent_id from the Talent table
                 get_talent_id = self.conn.execute("SELECT talent_id FROM Talent WHERE talent_name = ? ", row.name)
@@ -102,23 +102,23 @@ class LoadData:
                               row.Independent_W1, row.Determined_W1, row.Professional_W1, row.Studious_W1,
                               row.Imginative_W1,
                               row.Analytic_W2, row.Independent_W2, row.Determined_W2, row.Professional_W2,
-                              row.Studious_W2, row.Imginative_W2,
+                              row.Studious_W2, row.Imaginative_W2,
                               row.Analytic_W3, row.Independent_W3, row.Determined_W3, row.Professional_W3,
-                              row.Studious_W3, row.Imginative_W3,
+                              row.Studious_W3, row.Imaginative_W3,
                               row.Analytic_W4, row.Independent_W4, row.Determined_W4, row.Professional_W4,
-                              row.Studious_W4, row.Imginative_W4,
+                              row.Studious_W4, row.Imaginative_W4,
                               row.Analytic_W5, row.Independent_W5, row.Determined_W5, row.Professional_W5,
-                              row.Studious_W5, row.Imginative_W5,
+                              row.Studious_W5, row.Imaginative_W5,
                               row.Analytic_W6, row.Independent_W6, row.Determined_W6, row.Professional_W6,
-                              row.Studious_W6, row.Imginative_W6,
+                              row.Studious_W6, row.Imaginative_W6,
                               row.Analytic_W7, row.Independent_W7, row.Determined_W7, row.Professional_W7,
-                              row.Studious_W7, row.Imginative_W7,
+                              row.Studious_W7, row.Imaginative_W7,
                               row.Analytic_W8, row.Independent_W8, row.Determined_W8, row.Professional_W8,
-                              row.Studious_W8, row.Imginative_W8,
+                              row.Studious_W8, row.Imaginative_W8,
                               row.Analytic_W9, row.Independent_W9, row.Determined_W9, row.Professional_W9,
-                              row.Studious_W9, row.Imginative_W9,
+                              row.Studious_W9, row.Imaginative_W9,
                               row.Analytic_W10, row.Independent_W10, row.Determined_W10, row.Professional_W10,
-                              row.Studious_W10, row.Imginative_W10, row.course_name, row.active, talent_id)
+                              row.Studious_W10, row.Imaginative_W10, row.course_name, row.active, talent_id)
         self.conn.commit()
 
 
