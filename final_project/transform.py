@@ -20,30 +20,36 @@ self.academy_df -
 # We will add the additional columns
 
 class Transform_csv():
-    def __init__(self):
+    def __init__(self, academy_df):
         #This is a temporary filepath, will inheret filepath
-        self.academy_df = pd.read_csv("C:/Users/joest/Downloads/Data_29_2019-03-04.csv")
+        #self.academy_df = pd.read_csv("C:/Users/joest/Downloads/Data_29_2019-03-04.csv")
+        self.academy_df = academy_df
         #super().__init__()
-        if __name__ == '__main__':
-            self.add_columns()
-            self.active_nulls()
-            self.null_rename()
-            self.floats_to_ints()
-            self.deactive_nulls()
-            print(self.academy_df.to_string())
+
+        self.add_columns()
+        self.active_nulls()
+        self.null_rename()
+        self.floats_to_ints()
+        self.deactive_nulls()
+
 
 
     def add_columns(self):
         #Create a new column for the Spartan's status, initially populated with Y values
         row_list = []
-        for i in range(self.academy_df.index.values[-1] + 1):
+        for i in range(len(self.academy_df.index.values)):
             row_list.append("Y")
-        self.academy_df.insert(2, "Active", row_list, True)
+        print(len(row_list))
+        self.academy_df.insert(4, "Active", row_list, True)
         #if the candidate is not present the in final week they have dropped off the course and are inactive
 
     def active_nulls(self):
         #Null values are replaced with 99, an obviously false value
-        self.academy_df.fillna(99, inplace=True)
+        for column in self.academy_df:
+            # if "_W" in column:
+            #     if "_W9" not in column and "_W10" not in column:
+            #         self.academy_df[column].fillna(99, inplace=True)
+            self.academy_df[column].fillna(99, inplace=True)
 
     def null_rename(self):
         #If there are 99s (hence null values) in the final column, that is a solid indication of someone being dropped
@@ -54,7 +60,7 @@ class Transform_csv():
         #The characteristic columns all contain a "_W" so they can be found that way
         for column in self.academy_df:
             if "_W" in column:
-                self.academy_df[column] = self.academy_df[column].astype(int)
+                    self.academy_df[column] = self.academy_df[column].astype(int)
 
     def deactive_nulls(self):
 
@@ -105,13 +111,14 @@ class Transform_json():
 
 
 if __name__ == '__main__':
-    test = Transform_json()
-    test.talent_df['self_development'] = 'No'
-    print(test.talent_df.to_string())
-    test.json_active_bits()
-    print(test.talent_df.to_string())
-    print(test.talent_df['geo_flex'].dtype)
-    # test.date_types_changed()
+    # test = Transform_json()
+    # test.talent_df['self_development'] = 'No'
+    # print(test.talent_df.to_string())
+    # test.json_active_bits()
+    # print(test.talent_df.to_string())
+    # print(test.talent_df['geo_flex'].dtype)
+    # # test.date_types_changed()
+    t = Transform_csv()
 
 
 

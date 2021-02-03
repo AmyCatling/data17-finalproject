@@ -16,7 +16,7 @@ class Extract:
         self.json_dict_list = []
         self.academy_df = None
         self.talent_df = None
-        self.all_data_loader()
+        #self.all_data_loader()
         # self.create_csv()
 
     def data_checker(self):
@@ -37,7 +37,7 @@ class Extract:
                 break
 
     def all_data_loader(self):
-        self.retrieve_json_file_names()
+        #self.retrieve_json_file_names()
         self.retrieve_csv_file_names()
 
     def retrieve_csv_file_names(self):
@@ -93,8 +93,11 @@ class Extract:
         self.talent_df.to_csv(r'C:\Users\lucio\PycharmProjects\data17-finalproject\talent.csv', index=False)
         self.academy_df.to_csv(r'C:\Users\lucio\PycharmProjects\data17-finalproject\academy.csv', index=False)
 
+if __name__ == '__main__':
 
-instance = Extract()
+    instance = Extract()
+    instance.all_data_loader()
+    print(instance.academy_df.to_string())
 
 # print(instance.academy_df)
 # print(instance.talent_df)
