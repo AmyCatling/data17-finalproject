@@ -21,7 +21,6 @@ class Extract:
         self.devcounter = devcounter
         # self.create_csv()
 
-
     def get_bucket_contents(self):
         kwargs = {'Bucket': bucket_name}
         while True:
@@ -43,11 +42,10 @@ class Extract:
             self.retrieve_json_file_names()
             self.retrieve_academy_csv_file_names()
 
-    def retrieve_file_names(self, filechoice, location):
-        items_in_bucket = [item['Key'] for item in self.bucket_contents]
-
-
-
+    # def retrieve_file_names(self, filechoice, location):
+    #     items_in_bucket = [item['Key'] for item in self.bucket_contents]
+    #     exec(f'all_{location}_{filechoice} = fnmatch.filter(items_in_bucket, *.{filechoice})')
+    #back in 5 mins-Ross
 
     def retrieve_academy_csv_file_names(self):
         items_in_bucket = [item['Key'] for item in self.bucket_contents]
@@ -65,6 +63,11 @@ class Extract:
         print(f"A total of {len(self.applicant_csv_file_names_list)} Academy csv files were found in Amazon S3")
         self.csv_to_df()
 
+    def retrieve_json_file_names(self):
+        items_in_bucket = [item['Key'] for item in self.bucket_contents]
+        self.json_file_names_list = fnmatch.filter(items_in_bucket, '*.json')
+        print(f"A total of {len(self.json_file_names_list)} json files were found in Amazon S3")
+        self.json_to_df()
 
     def retrieve_json_file_names(self):
         items_in_bucket = [item['Key'] for item in self.bucket_contents]
@@ -96,10 +99,8 @@ class Extract:
             self.csv_df_list.append(df)
         self.academy_df = pd.concat(self.csv_df_list)
 
-
     def csv_to_df(self):
         pass
-
 
     def json_to_df(self):
         count = 0
