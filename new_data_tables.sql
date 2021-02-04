@@ -16,8 +16,6 @@ CREATE TABLE Applicants (
 );
 
 
-
-
 CREATE TABLE Tests (
     name VARCHAR(100),
     psychometric_score_100 INT,
