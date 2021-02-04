@@ -81,6 +81,7 @@ class Extract:
         self.academy_csv_file_names_list = [file for file in all_csv if file not in applicant_csvs]
         print(self.academy_csv_file_names_list)
         print(f"A total of {len(self.academy_csv_file_names_list)} Academy csv files were found in Amazon S3")
+        
         self.academy_csv_to_df()
 
     def retrieve_applicant_csv_file_names(self):

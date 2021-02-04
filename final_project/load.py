@@ -17,14 +17,12 @@ class LoadData:
             self.academy_df = df
             self.import_academy_data()
 
-        print(self.conn)
-
     def import_talent_data(self):  # import talent team data
         for index, row in self.talent_df.iterrows():
             self.conn.execute('INSERT INTO Talent(original_file_name, talent_name, assessment_day, known_technologies,\
                               strengths, weaknesses, self_development, geo_flexible, financial_support_self,\
                               result, course_interest) VALUES (?,?,?,?,?,?,?,?,?,?,?)',row.original_file_name, row['name'], row.date,
-                              str(row.tech_self_score).encode('utf-16'), str(row.strengths).encode('utf-8'), str(row.weaknesses).encode('utf-8'), row.self_development,
+                              row.tech_self_score, row.strengths, row.weaknesses, row.self_development,
                               row.geo_flex, row.financial_support_self, row.result, row.course_interest)
         self.conn.commit()
 
