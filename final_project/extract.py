@@ -142,8 +142,6 @@ class Extract:
     def json_to_df(self):
         count = 0
         for file in self.json_file_names_list:
-            # for file in self.json_file_names_list[1000:1100]:
-            #     if self.devcounter and count%10 == 0:
             key = file
             s3_object = s3_client.get_object(Bucket=bucket_name, Key=key)
             file = s3_object['Body']
@@ -177,11 +175,10 @@ class Extract:
 
 
 if __name__ == '__main__':
-    instance = Extract('applicant_csv')
+    instance = Extract('all')
     instance.all_data_loader()
-    # print(instance.academy_df)
-    # print(instance.talent_df)
+    print(instance.academy_df)
+    print(instance.talent_df)
     print(instance.applicant_df)
-    # print(instance.sparta_day_df)
+    print(instance.sparta_day_df)
 
-# pprint(bucket_contents)
