@@ -10,7 +10,8 @@ class Extract:
     def __init__(self, filechoice, devcounter=False):
         self.bucket_contents = []
         self.get_bucket_contents()
-        self.csv_file_names_list = []
+        self.academy_csv_file_names_list = []
+        self.applicant_csv_file_names_list = []
         self.json_file_names_list = []
         self.csv_df_list = []
         self.json_dict_list = []
@@ -18,13 +19,8 @@ class Extract:
         self.talent_df = None
         self.filechoice = filechoice
         self.devcounter = devcounter
-        #self.all_data_loader()
         # self.create_csv()
 
-    def data_checker(self):
-        pass
-        # if data in SQL, continue
-        # if not in sql, append data to csv_file_names_list and same for json in json_file_names_list
 
     def get_bucket_contents(self):
         kwargs = {'Bucket': bucket_name}
@@ -32,30 +28,43 @@ class Extract:
             resp = s3_client.list_objects_v2(**kwargs)
             for obj in resp['Contents']:
                 self.bucket_contents.append(obj)
-
             try:
                 kwargs['ContinuationToken'] = resp['NextContinuationToken']
             except KeyError:
                 break
 
     def all_data_loader(self):
-        if self.filechoice == 'json':
+        exec(f'self.retrieve_{self.filechoice}_file_names()')
+        # if self.filechoice == 'json':
+        #     self.retrieve_json_file_names()
+        # elif self.filechoice == 'csv':
+        #     self.retrieve_academy_csv_file_names()
+        if self.filechoice == 'all':
             self.retrieve_json_file_names()
-        elif self.filechoice == 'csv':
-            self.retrieve_csv_file_names()
-        elif self.filechoice == 'all':
-            self.retrieve_json_file_names()
-            self.retrieve_csv_file_names()
+            self.retrieve_academy_csv_file_names()
+
+    def retrieve_file_names(self, filechoice, location):
+        items_in_bucket = [item['Key'] for item in self.bucket_contents]
 
 
-    def retrieve_csv_file_names(self):
+
+
+    def retrieve_academy_csv_file_names(self):
         items_in_bucket = [item['Key'] for item in self.bucket_contents]
         all_csv = fnmatch.filter(items_in_bucket, '*.csv')
         applicant_csvs = fnmatch.filter(items_in_bucket, '*Applicants.csv')
-        self.csv_file_names_list = [file for file in all_csv if file not in applicant_csvs]
-        print(self.csv_file_names_list)
-        print(f"A total of {len(self.csv_file_names_list)} Academy csv files were found in Amazon S3")
+        self.academy_csv_file_names_list = [file for file in all_csv if file not in applicant_csvs]
+        print(self.academy_csv_file_names_list)
+        print(f"A total of {len(self.academy_csv_file_names_list)} Academy csv files were found in Amazon S3")
         self.csv_to_df()
+
+    def retrieve_applicant_csv_file_names(self):
+        items_in_bucket = [item['Key'] for item in self.bucket_contents]
+        self.applicant_csv_file_names_list = fnmatch.filter(items_in_bucket, '*Applicants.csv')
+        print(self.applicant_csv_file_names_list)
+        print(f"A total of {len(self.applicant_csv_file_names_list)} Academy csv files were found in Amazon S3")
+        self.csv_to_df()
+
 
     def retrieve_json_file_names(self):
         items_in_bucket = [item['Key'] for item in self.bucket_contents]
@@ -63,8 +72,8 @@ class Extract:
         print(f"A total of {len(self.json_file_names_list)} json files were found in Amazon S3")
         self.json_to_df()
 
-    def csv_to_df(self):
-        for file in self.csv_file_names_list:
+    def academy_csv_to_df(self):
+        for file in self.academy_csv_file_names_list:
             key = file
             s3_object = s3_client.get_object(Bucket=bucket_name, Key=key)
             file = s3_object['Body']
@@ -86,6 +95,11 @@ class Extract:
                 df[column].fillna(101, inplace=True) ###REMOVE IF THIS BREAKS ANYTHING
             self.csv_df_list.append(df)
         self.academy_df = pd.concat(self.csv_df_list)
+
+
+    def csv_to_df(self):
+        pass
+
 
     def json_to_df(self):
         count = 0

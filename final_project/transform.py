@@ -114,7 +114,7 @@ class Transform_json():
         print(type(new_dates[0]))
 
 
-    #iterate through string columns and encode them inplace
+#iterate through string columns and encode them inplace
 
 
 
