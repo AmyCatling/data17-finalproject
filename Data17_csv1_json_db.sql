@@ -1,14 +1,16 @@
-CREATE DATABASE Sparta_Db;
+--CREATE DATABASE Sparta_Db;
 USE Sparta_Db;
  
 -- DROP TABLE Talent
 -- DROP TABLE Academy
  
 CREATE TABLE Talent(
+
 talent_id INT NOT NULL IDENTITY PRIMARY KEY,
+original_file_name VARCHAR(100),
 talent_name VARCHAR(100) NOT NULL,
 assessment_day DATE,
-known_technologies VARCHAR(100),
+known_technologies NVARCHAR(MAX),
 strengths VARCHAR(100),
 weaknesses VARCHAR(100),
 self_development BIT,
@@ -20,7 +22,13 @@ course_interest VARCHAR(100)
  
 CREATE TABLE Academy(
     student_id INT NOT NULL IDENTITY PRIMARY KEY,
+    talent_id  INT NOT NULL FOREIGN KEY REFERENCES Talent(talent_id),
+    original_file_name VARCHAR(100),
+    course_name VARCHAR(100),
+    date VARCHAR(50),
+    name VARCHAR(80),
     trainer VARCHAR(100),
+    active CHAR(1),
     analytical_w1 INT,
     independent_w1 INT,
     determined_w1 INT,
@@ -81,9 +89,6 @@ CREATE TABLE Academy(
     professional_w10 INT,
     studious_w10 INT,
     imaginative_w10 INT,
-    course_name VARCHAR(100),
-    active BIT,
-    talent_id  INT NOT NULL FOREIGN KEY REFERENCES Talent(talent_id)
  
 )
  

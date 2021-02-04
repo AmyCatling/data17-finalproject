@@ -1,7 +1,7 @@
 #!!!!!CHECK INDECIES WITH NEW DATAFRAMES!!!!!
 #Check final dates
-
-
+from final_project.config import *
+import pyodbc
 import json
 import pandas as pd
 import numpy as np
@@ -28,9 +28,10 @@ class Transform_csv():
 
         self.add_columns()
         self.active_nulls()
-        self.null_rename()
         self.floats_to_ints()
+        self.null_rename()
         self.deactive_nulls()
+        print(self.academy_df.to_string())
 
 
 
@@ -46,15 +47,16 @@ class Transform_csv():
     def active_nulls(self):
         #Null values are replaced with 99, an obviously false value
         for column in self.academy_df:
-            # if "_W" in column:
-            #     if "_W9" not in column and "_W10" not in column:
-            #         self.academy_df[column].fillna(99, inplace=True)
-            self.academy_df[column].fillna(99, inplace=True)
+            if "_W" in column:
+                if "_W9" not in column and "_W10" not in column:
+                    self.academy_df[column].fillna(99, inplace=True)
+                else:
+                    self.academy_df[column].fillna(0, inplace=True)
 
     def null_rename(self):
-        #If there are 99s (hence null values) in the final column, that is a solid indication of someone being dropped
-        final_index = self.academy_df.columns[-1]
-        self.academy_df.loc[self.academy_df[final_index] == 99, "Active"] = "N"
+            for index, row in self.academy_df.iterrows():
+                if 99 in row.values:
+                    self.academy_df.at[index, 'Active'] = 'N'
 
     def floats_to_ints(self):
         #The characteristic columns all contain a "_W" so they can be found that way
@@ -75,9 +77,10 @@ class Transform_json():
         # j = json.load(f)
         # self.talent_df = pd.DataFrame([j])
         self.talent_df = talent_df
-        #self.json_active_bits()
+        self.json_active_bits()
         self.fix_nulls()
-        #self.date_types_changed()
+        self.date_types_changed()
+        self.encode_columns()
 
         # self.json_active_bits()
         # self.date_types_changed()
@@ -98,10 +101,10 @@ class Transform_json():
             for index, entry in enumerate(self.talent_df[column]):
                 #self.talent_df[column].replace({'Yes': True, 'No': False, 'Pass': True, 'Fail': False})
                 if entry == 'Yes' or entry == 'Pass':
-                    self.talent_df[column][index] = 'True'
+                    self.talent_df[column][index] = 1
                 elif entry == 'No' or entry == 'Fail':
-                    self.talent_df[column][index] = 'False'
-            self.talent_df[column] = self.talent_df[column].astype(bool)  # ignore me
+                    self.talent_df[column][index] = 0
+            #self.talent_df[column] = self.talent_df[column].astype(bool)  # ignore me
 
     def fix_nulls(self):
         self.talent_df['tech_self_score'].fillna('None', inplace=True)
@@ -109,12 +112,26 @@ class Transform_json():
     def date_types_changed(self):
         new_dates = []
         for i in self.talent_df['date']:
-
+            if len(i) != 10:
+                i = i.replace('//', '/')
             new_dates.append(datetime.datetime.strptime(i, '%d/%m/%Y').date())
-        print(type(new_dates[0]))
+        self.talent_df['date'] = new_dates
+        #print(type(new_dates[0]))
 
+    def encode_columns(self):
 
-#iterate through string columns and encode them inplace
+        tech = []
+        strengths = []
+        weaknesses = []
+
+        for index, row in self.talent_df.iterrows():
+            tech.append(str(row.tech_self_score).encode('utf-16'))
+            strengths.append(str(row.strengths).encode('utf-8'))
+            weaknesses(str(row.weaknesses).encode('utf-8'))
+
+        self.talent_df['tech_self_score'] = tech
+        self.talent_df['strengths'] = strengths
+        self.talent_df['weaknesses'] = weaknesses
 
 
 
