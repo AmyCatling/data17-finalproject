@@ -33,11 +33,11 @@ class Extract:
                 break
 
     def all_data_loader(self):
-        exec(f'self.retrieve_{self.filechoice}_file_names()')
-        # if self.filechoice == 'json':
-        #     self.retrieve_json_file_names()
-        # elif self.filechoice == 'csv':
-        #     self.retrieve_academy_csv_file_names()
+        #exec(f'self.retrieve_{self.filechoice}_file_names()')
+        if self.filechoice == 'json':
+            self.retrieve_json_file_names()
+        elif self.filechoice == 'csv':
+            self.retrieve_academy_csv_file_names()
         if self.filechoice == 'all':
             self.retrieve_json_file_names()
             self.retrieve_academy_csv_file_names()
@@ -54,7 +54,8 @@ class Extract:
         self.academy_csv_file_names_list = [file for file in all_csv if file not in applicant_csvs]
         print(self.academy_csv_file_names_list)
         print(f"A total of {len(self.academy_csv_file_names_list)} Academy csv files were found in Amazon S3")
-        self.csv_to_df()
+        #self.csv_to_df()
+        self.academy_csv_to_df()
 
     def retrieve_applicant_csv_file_names(self):
         items_in_bucket = [item['Key'] for item in self.bucket_contents]
@@ -122,6 +123,7 @@ class Extract:
     def create_csv(self):
         self.talent_df.to_csv(r'C:\Users\lucio\PycharmProjects\data17-finalproject\talent.csv', index=False)
         self.academy_df.to_csv(r'C:\Users\lucio\PycharmProjects\data17-finalproject\academy.csv', index=False)
+
 
 if __name__ == '__main__':
 
