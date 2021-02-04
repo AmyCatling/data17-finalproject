@@ -82,15 +82,15 @@ class Extract:
             elif 'Engineering' in key:
                 df['course_name'] = key[slice(8, 22)]
                 df['date'] = key[slice(23, 33)]
-            for column in df:
-                df[column].fillna(101, inplace=True) ###REMOVE IF THIS BREAKS ANYTHING
+            # for column in df:
+            #     df[column].fillna(101, inplace=True) ###REMOVE IF THIS BREAKS ANYTHING
             self.csv_df_list.append(df)
         self.academy_df = pd.concat(self.csv_df_list)
 
     def json_to_df(self):
         count = 0
         # for file in self.json_file_names_list:
-        for file in self.json_file_names_list[1000:1100]:
+        for file in self.json_file_names_list:
             if self.devcounter and count%10 == 0:
                 print(count)
             key = file
