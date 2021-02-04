@@ -8,10 +8,7 @@ import boto3
 
 class Extract:
     def __init__(self, filechoice, devcounter=False):
-        #Test functions here:
-        self.retrieve_file_names('csv', 'Academy')
-
-        #create empty lists and attributes
+        # create empty lists and attributes
         self.bucket_contents = []
 
         self.academy_csv_file_names_list = []
@@ -32,10 +29,11 @@ class Extract:
         self.filechoice = filechoice
         self.devcounter = devcounter
 
-        #call methods
+        # call methods
         self.get_bucket_contents()
 
-    #function to retrieve everything from a bucket (>1000 items)
+
+    # function to retrieve everything from a bucket (>1000 items)
     def get_bucket_contents(self):
         kwargs = {'Bucket': bucket_name}
         while True:
@@ -47,16 +45,20 @@ class Extract:
             except KeyError:
                 break
 
-    #function to call retrieval functions for the specified file type
+    # function to call retrieval functions for the specified file type
     def all_data_loader(self):
         if self.filechoice == 'json':
             self.retrieve_json_file_names()
+
         elif self.filechoice == 'academy_csv':
             self.retrieve_academy_csv_file_names()
+
         elif self.filechoice == 'applicant_csv':
             self.retrieve_applicant_csv_file_names()
+
         elif self.filechoice == 'txt':
-            self.txt_to_df()
+            self.retrieve_txt_file_names()
+
         elif self.filechoice == 'all':
             self.retrieve_json_file_names()
             self.retrieve_academy_csv_file_names()
@@ -71,7 +73,7 @@ class Extract:
         # print(all_Academy_csv)
         # self.academy_csv_to_df()
 
-    #4 functions to retrieve files of each format
+    # 4 functions to retrieve files of each format
     def retrieve_academy_csv_file_names(self):
         items_in_bucket = [item['Key'] for item in self.bucket_contents]
         all_csv = fnmatch.filter(items_in_bucket, '*.csv')
@@ -85,12 +87,13 @@ class Extract:
         items_in_bucket = [item['Key'] for item in self.bucket_contents]
         self.applicant_csv_file_names_list = fnmatch.filter(items_in_bucket, '*Applicants.csv')
         print(self.applicant_csv_file_names_list)
-        print(f"A total of {len(self.applicant_csv_file_names_list)} Academy csv files were found in Amazon S3")
+        print(f"A total of {len(self.applicant_csv_file_names_list)} Applicant csv files were found in Amazon S3")
         self.applicant_csv_to_df()
 
     def retrieve_json_file_names(self):
         items_in_bucket = [item['Key'] for item in self.bucket_contents]
         self.json_file_names_list = fnmatch.filter(items_in_bucket, '*.json')
+        print(self.json_file_names_list)
         print(f"A total of {len(self.json_file_names_list)} json files were found in Amazon S3")
         self.json_to_df()
 
@@ -98,6 +101,7 @@ class Extract:
         items_in_bucket = [item['Key'] for item in self.bucket_contents]
         self.txt_file_names_list = fnmatch.filter(items_in_bucket, '*.txt')
         print(f"A total of {len(self.txt_file_names_list)} txt files were found in Amazon S3")
+        print(self.txt_file_names_list)
         self.txt_to_df()
 
     def academy_csv_to_df(self):
@@ -120,7 +124,7 @@ class Extract:
                 df['course_name'] = key[slice(8, 22)]
                 df['date'] = key[slice(23, 33)]
             for column in df:
-                df[column].fillna(101, inplace=True) ### REMOVE IF THIS BREAKS ANYTHING
+                df[column].fillna(101, inplace=True)  ### REMOVE IF THIS BREAKS ANYTHING
             self.academy_csv_df_list.append(df)
         self.academy_df = pd.concat(self.academy_csv_df_list)
 
@@ -138,46 +142,46 @@ class Extract:
     def json_to_df(self):
         count = 0
         for file in self.json_file_names_list:
-        # for file in self.json_file_names_list[1000:1100]:
-            if self.devcounter and count%10 == 0:
-                print(count)
-                key = file
-                s3_object = s3_client.get_object(Bucket=bucket_name, Key=key)
-                file = s3_object['Body']
-                jsondict = json.load(file)
-                jsondf = pd.DataFrame([jsondict])
-                jsondf.insert(0, 'original_file_name', '')
-                jsondf['original_file_name'] = key
-                self.json_dict_list.append(jsondf)
-                count += 1
-            self.talent_df = pd.concat(self.json_dict_list)
+            # for file in self.json_file_names_list[1000:1100]:
+            #     if self.devcounter and count%10 == 0:
+            key = file
+            s3_object = s3_client.get_object(Bucket=bucket_name, Key=key)
+            file = s3_object['Body']
+            jsondict = json.load(file)
+            jsondf = pd.DataFrame([jsondict])
+            jsondf.insert(0, 'original_file_name', '')
+            jsondf['original_file_name'] = key
+            self.json_dict_list.append(jsondf)
+            count += 1
+            if count > 100:
+                break
+        self.talent_df = pd.concat(self.json_dict_list)
 
     def txt_to_df(self):
         for file in self.txt_file_names_list:
-            print(file)
             key = file
             s3_object = s3_client.get_object(Bucket=bucket_name, Key=key)
             file = s3_object['Body']
             test_df = pd.read_csv(file, header=None, skiprows=3)
             test_df.columns = ['name', 'presentation']
-            test_df[['name','psychometrics']] = test_df['name'].str.split
+            test_df[['name', 'psychometrics']] = test_df['name'].str.split
             test_df['original_file_name'] = key
-            test_df = test_df[['original_file_name', 'name', 'psychometrics', 'presentation']]
+            test_df['Academy'] = "placeholder"
+            test_df = test_df[['original_file_name', 'Academy', 'name', 'psychometrics', 'presentation']]
             self.sparta_day_df_list.append(test_df)
         self.sparta_day_df = pd.concat(self.sparta_day_df_list)
-
-
 
     def create_csv(self):
         self.talent_df.to_csv(r'C:\Users\lucio\PycharmProjects\data17-finalproject\talent.csv', index=False)
         self.academy_df.to_csv(r'C:\Users\lucio\PycharmProjects\data17-finalproject\academy.csv', index=False)
 
+
 if __name__ == '__main__':
-    instance = Extract('all')
+    instance = Extract('applicant_csv')
     instance.all_data_loader()
-    print(instance.academy_df)
-    print(instance.talent_df)
+    # print(instance.academy_df)
+    # print(instance.talent_df)
     print(instance.applicant_df)
-    print(instance.sparta_day_df)
+    # print(instance.sparta_day_df)
 
 # pprint(bucket_contents)
