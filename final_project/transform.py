@@ -133,8 +133,6 @@ class Transform_json():
         self.talent_df['strengths'] = strengths
         self.talent_df['weaknesses'] = weaknesses
 
-        #iterate through string columns and encode them inplace
-
 
 
 
