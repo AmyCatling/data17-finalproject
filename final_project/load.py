@@ -17,27 +17,25 @@ class LoadData:
             self.academy_df = df
             self.import_academy_data()
 
-        print(self.conn)
-
     def import_talent_data(self):  # import talent team data
         for index, row in self.talent_df.iterrows():
             self.conn.execute('INSERT INTO Talent(original_file_name, talent_name, assessment_day, known_technologies,\
                               strengths, weaknesses, self_development, geo_flexible, financial_support_self,\
-                              result, course_interest) VALUES (?,?,?,?,?,?,?,?,?,?,?)',str(row.original_file_name).encode('utf-8'), str(row.name).encode('utf-8'), str(row.date).encode('utf-8'),
-                              str(row.tech_self_score).encode('utf-16'), str(row.strengths).encode('utf-8'), str(row.weaknesses).encode('utf-8'), str(row.self_development).encode('utf-8'),
-                              str(row.geo_flex).encode('utf-8'), str(row.financial_support_self).encode('utf-8'), str(row.result).encode('utf-8'), str(row.course_interest).encode('utf-8'))
+                              result, course_interest) VALUES (?,?,?,?,?,?,?,?,?,?,?)',row.original_file_name, row['name'], row.date,
+                              row.tech_self_score, row.strengths, row.weaknesses, row.self_development,
+                              row.geo_flex, row.financial_support_self, row.result, row.course_interest)
         self.conn.commit()
 
     def import_academy_data(self):  # import academy data
         for index, row in self.academy_df.iterrows():  # iterate through academy df
 
-            # try:  # get a talent_id from the Talent table
-            #     get_talent_id = self.conn.execute("SELECT talent_id FROM Talent WHERE talent_name = ? ", row.name)
-            #     talent_id = get_talent_id.fetchone()
-            # except TypeError:
-            #     print("This person was not present at the talent day")
+            try:  # get a talent_id from the Talent table
+                get_talent_id = self.conn.execute("SELECT talent_id FROM Talent WHERE talent_name = ? ", row['name'])
+                talent_id = get_talent_id.fetchone()[0]
+            except TypeError:
+                print("This person was not present at the talent day")
 
-            self.conn.execute('INSERT INTO Academy (original_file_name,\
+            self.conn.execute('INSERT INTO Academy (talent_id, original_file_name,\
                                                 course_name,\
                                                 date,\
                                                 name,\
@@ -104,7 +102,7 @@ class LoadData:
                                                 studious_w10,\
                                                 imaginative_w10)\
                                     VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,\
-                                    ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',row.original_file_name, row.course_name, row.date,row.name, row.Active, row.trainer, row.Analytic_W1,
+                                    ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', talent_id, row.original_file_name, row.course_name, row.date,row.name, row.Active, row.trainer, row.Analytic_W1,
                               row.Independent_W1, row.Determined_W1, row.Professional_W1, row.Studious_W1,
                               row.Imaginative_W1,
                               row.Analytic_W2, row.Independent_W2, row.Determined_W2, row.Professional_W2,

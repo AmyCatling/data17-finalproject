@@ -1,9 +1,42 @@
+-- ALL FOUR TABLES COMBINED
+-- APPLICANT ID IS FOREIGN KEY FOR EACH TABLE
+
 CREATE DATABASE Sparta_Db;
 USE Sparta_Db;
- 
+
+-- DROP TABLE Applicants
+-- DROP TABLE Tests 
 -- DROP TABLE Talent
 -- DROP TABLE Academy
- 
+
+CREATE TABLE Applicants (
+    applicant_id INT NOT NULL IDENTITY PRIMARY KEY,
+    applicant_name VARCHAR(100),
+    gender CHAR(1),
+    dob DATE,
+    email VARCHAR(320),
+    city VARCHAR(100),
+    applicant_address VARCHAR(MAX),
+    postcode VARCHAR(4),
+    phone VARCHAR(20),
+    university VARCHAR(MAX),
+    degree VARCHAR(5),
+    invited_date INT,
+    month_year VARCHAR(10),
+    invited_by VARCHAR(100)
+);
+
+
+CREATE TABLE Tests (
+    name VARCHAR(100),
+    psychometric_score_100 INT,
+    presentation_score_32 INT,
+    academy VARCHAR(20),
+    test_date DATE,
+    applicant_id INT FOREIGN KEY REFERENCES Applicants(applicant_id)
+
+);
+
 CREATE TABLE Talent(
 talent_id INT NOT NULL IDENTITY PRIMARY KEY,
 talent_name VARCHAR(100) NOT NULL,
@@ -15,7 +48,8 @@ self_development BIT,
 geo_flexible BIT,
 financial_support_self BIT,
 result BIT,
-course_interest VARCHAR(100)
+course_interest VARCHAR(100),
+applicant_id INT FOREIGN KEY REFERENCES Applicants(applicant_id)
 )
  
 CREATE TABLE Academy(
@@ -83,9 +117,12 @@ CREATE TABLE Academy(
     imaginative_w10 INT,
     course_name VARCHAR(100),
     active BIT,
-    talent_id  INT NOT NULL FOREIGN KEY REFERENCES Talent(talent_id)
+    applicant_id INT FOREIGN KEY REFERENCES Applicants(applicant_id)
  
 )
  
-SELECT * FROM Talent;
-SELECT * FROM Academy;
+
+-- SELECT * FROM Applicants;
+-- SELECT * FROM Tests; 
+-- SELECT * FROM Talent;
+-- SELECT * FROM Academy;

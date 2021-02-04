@@ -1,25 +1,13 @@
-#!!!!!CHECK INDECIES WITH NEW DATAFRAMES!!!!!
+
 #Check final dates
-
-
 import json
 import pandas as pd
 import numpy as np
 import datetime
-"""
-Variables:
-self.csv_file_names_list - a list of the names of csvs we iterate through
-self.json_file_names_list - a list of the names of jsons we iterate through
-self.csv_df_list - a list of dataframes generated from the csv files
-self.json_df_list - a list of dataframes generated from the json files
-self.talent_df - a dataframe for a given json
-self.academy_df - 
+from dateutil.parser import parse
 
-"""
 
-# We will add the additional columns
-
-class Transform_csv():
+class Transform_academy_csv():
     def __init__(self, academy_df):
         #This is a temporary filepath, will inheret filepath
         #self.academy_df = pd.read_csv("C:/Users/joest/Downloads/Data_29_2019-03-04.csv")
@@ -28,33 +16,40 @@ class Transform_csv():
 
         self.add_columns()
         self.active_nulls()
-        self.null_rename()
         self.floats_to_ints()
+        self.null_rename()
         self.deactive_nulls()
+        #print(self.academy_df.to_string())
 
 
 
     def add_columns(self):
         #Create a new column for the Spartan's status, initially populated with Y values
+
         row_list = []
         for i in range(len(self.academy_df.index.values)):
             row_list.append("Y")
-        print(len(row_list))
         self.academy_df.insert(4, "Active", row_list, True)
-        #if the candidate is not present the in final week they have dropped off the course and are inactive
 
     def active_nulls(self):
         #Null values are replaced with 99, an obviously false value
         for column in self.academy_df:
-            # if "_W" in column:
-            #     if "_W9" not in column and "_W10" not in column:
-            #         self.academy_df[column].fillna(99, inplace=True)
-            self.academy_df[column].fillna(99, inplace=True)
+            if "_W" in column:
+                if "_W9" not in column and "_W10" not in column:
+                    self.academy_df[column].fillna(99, inplace=True)
+                else:
+                    self.academy_df[column].fillna(0, inplace=True)
 
     def null_rename(self):
-        #If there are 99s (hence null values) in the final column, that is a solid indication of someone being dropped
-        final_index = self.academy_df.columns[-1]
-        self.academy_df.loc[self.academy_df[final_index] == 99, "Active"] = "N"
+        active_list = []
+        for index, row in self.academy_df.iterrows():
+            if 99 in row.values:
+                active_list.append('N')
+            else:
+                active_list.append('Y')
+        self.academy_df['Active'] = active_list
+
+
 
     def floats_to_ints(self):
         #The characteristic columns all contain a "_W" so they can be found that way
@@ -67,7 +62,8 @@ class Transform_csv():
         self.academy_df = self.academy_df.replace(99, 0)
 
 
-# test_case_csv = Transform_csv()
+
+
 
 class Transform_json():
     def __init__(self, talent_df):
@@ -75,33 +71,24 @@ class Transform_json():
         # j = json.load(f)
         # self.talent_df = pd.DataFrame([j])
         self.talent_df = talent_df
-        #self.json_active_bits()
+        self.json_active_bits()
         self.fix_nulls()
-        #self.date_types_changed()
-
-        # self.json_active_bits()
-        # self.date_types_changed()
-        # print(self.talent_df.dtypes)
-        #Incomplete
-
+        self.date_types_changed()
+        self.encode_columns()
 
 
     def json_active_bits(self):
 
-        # final_index = self.academy_df.columns[-1]
-        # self.academy_df.loc[self.academy_df[final_index] == 99, "Active"] = "N"
         relevant_columns = ['self_development','geo_flex','financial_support_self', 'result']
 
-        # self.talent_df.loc[self.talent_df[relevant_columns] == 'Yes'] = True
-
         for column in relevant_columns:
+            column_list = []
             for index, entry in enumerate(self.talent_df[column]):
-                #self.talent_df[column].replace({'Yes': True, 'No': False, 'Pass': True, 'Fail': False})
                 if entry == 'Yes' or entry == 'Pass':
-                    self.talent_df[column][index] = 'True'
+                    column_list.append(1)
                 elif entry == 'No' or entry == 'Fail':
-                    self.talent_df[column][index] = 'False'
-            self.talent_df[column] = self.talent_df[column].astype(bool)  # ignore me
+                    column_list.append(0)
+            self.talent_df[column] = column_list
 
     def fix_nulls(self):
         self.talent_df['tech_self_score'].fillna('None', inplace=True)
@@ -109,17 +96,82 @@ class Transform_json():
     def date_types_changed(self):
         new_dates = []
         for i in self.talent_df['date']:
-
+            if len(i) != 10:
+                i = i.replace('//', '/')
             new_dates.append(datetime.datetime.strptime(i, '%d/%m/%Y').date())
-        print(type(new_dates[0]))
+        self.talent_df['date'] = new_dates
+
+    def encode_columns(self):
+
+        tech = []
+        strengths = []
+        weaknesses = []
+
+        for index, row in self.talent_df.iterrows():
+            tech.append(str(row.tech_self_score).encode('utf-16'))
+            strengths.append(str(row.strengths).encode('utf-8'))
+            weaknesses.append(str(row.weaknesses).encode('utf-8'))
+
+        self.talent_df['tech_self_score'] = tech
+        self.talent_df['strengths'] = strengths
+        self.talent_df['weaknesses'] = weaknesses
 
 
-#iterate through string columns and encode them inplace
+class Transform_applicant_csv():
+
+    def __init__(self, applicant_df):
+        self.applicant_df = pd.read_csv("C:/Users/joest/Downloads/April2019Applicants.csv")
+        #self.applicant_df = applicant_df
+
+        #print(self.applicant_df.to_string())
 
 
+    def fix_dob_format(self):
+        new_dates = []
+        for i in self.applicant_df['dob']:
+            if type(i) != float:
+                if len(i) != 10:
+                    i = i.replace('//', '/')
+                new_dates.append(datetime.datetime.strptime(i, '%d/%m/%Y').date())
+            else:
+                new_dates.append(datetime.date(1970,1,1))
 
+        self.applicant_df['dob'] = new_dates
 
+    def format_phones(self):
+        numbers = []
+        for number in self.applicant_df['phone_number']:
+            if type(number) != float:
+                number = number.replace('-', '')
+                number = number.replace(' ', '')
+                number = number.replace('(', '')
+                number = number.replace(')', '')
+                numbers.append(number)
+            else:
+                numbers.append('Unknown')
+        self.applicant_df['phone_number'] = numbers
 
+    def fix_applicants_invite_format(self):
+        formatted_dates = []
+        for index, row in self.applicant_df.iterrows():
+            if row.invited_date is None or type(row.month) == float:
+                formatted_dates.append(datetime.date(1970,1,1))
+            else:
+                datestring = row.month.split(' ')[0]
+                datestring += ' '
+                datestring += str(int(row.invited_date))
+                datestring += ' '
+                datestring += row.month.split(' ')[1]
+                dt = parse(datestring)
+                formatted_dates.append(dt.date())
+        self.applicant_df['invited_date'] = formatted_dates
+        self.applicant_df.drop('month', axis=1, inplace=True)
+
+    def replace_nan(self):
+        self.applicant_df.fillna('Unknown', inplace=True)
+
+    def drop_id_column(self):
+        self.applicant_df.drop('id', axis=1, inplace=True)
 
 
 
@@ -131,7 +183,13 @@ if __name__ == '__main__':
     # print(test.talent_df.to_string())
     # print(test.talent_df['geo_flex'].dtype)
     # # test.date_types_changed()
-    t = Transform_csv()
+    t = Transform_applicant_csv('df')
+    t.fix_applicants_invite_format()
+    t.format_phones()
+    t.fix_dob_format()
+    t.replace_nan()
+    t.drop_id_column()
+    print(t.applicant_df.to_string())
 
 
 
