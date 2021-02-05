@@ -165,7 +165,14 @@ class Extract:
             file = s3_object['Body']
             test_df = pd.read_csv(file, header=None, skiprows=3)
             test_df.columns = ['name', 'presentation']
-            test_df[['name', 'psychometrics']] = test_df['name'].str.split
+            names = []
+            psychometric = []
+            for index, row in test_df.iterrows():
+                names.append(row['name'].split(' - ')[0])
+                psychometric.append(row['name'].split(' - ')[1])
+            test_df['name'] = names
+            test_df['psychometrics'] = psychometric
+            # test_df[['name', 'psychometrics']] = test_df['name'].str.split('-')[0]
             test_df['original_file_name'] = key
             s3_object2 = s3_client.get_object(Bucket=bucket_name, Key=key)
             file2 = s3_object2['Body'].read().decode('utf-8')
@@ -184,10 +191,11 @@ class Extract:
 
 
 if __name__ == '__main__':
-    instance = Extract('txt')
+    instance = Extract('all')
     instance.all_data_loader()
-    # print(instance.academy_df)
-    # print(instance.talent_df)
-    # print(instance.applicant_df)
+    print(instance.academy_df)
+    print(instance.talent_df)
+    print(instance.applicant_df)
+    print(instance.sparta_day_df)
     print(instance.sparta_day_df.to_string())
 
