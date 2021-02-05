@@ -19,7 +19,7 @@ class Transform_academy_csv():
         self.floats_to_ints()
         self.null_rename()
         self.deactive_nulls()
-        #print(self.academy_df.to_string())
+        print(self.academy_df.to_string())
 
 
 
@@ -59,13 +59,9 @@ class Transform_academy_csv():
 
     def deactive_nulls(self):
 
-        self.academy_df = self.academy_df.replace(99, None)
-        self.academy_df = self.academy_df.replace(0, None)
-
-
-
-
-
+        self.academy_df = self.academy_df.replace(99, np.nan)
+        self.academy_df = self.academy_df.replace(0, np.nan)
+        self.academy_df.fillna(None, inplace=True)
 
 class Transform_json():
     def __init__(self, talent_df):
@@ -118,17 +114,16 @@ class Transform_json():
         self.talent_df['strengths'] = strengths
         self.talent_df['weaknesses'] = weaknesses
 
-
 class Transform_applicant_csv():
 
     def __init__(self, applicant_df):
-        #self.applicant_df = pd.read_csv("C:/Users/joest/Downloads/April2019Applicants.csv")
-        self.applicant_df = applicant_df
-        self.drop_id_column()
-        self.fix_applicants_invite_format()
-        self.format_phones()
-        self.fix_dob_format()
-        self.replace_nan()
+        self.applicant_df = pd.read_csv("C:/Users/joest/Downloads/April2019Applicants.csv")
+        # self.applicant_df = applicant_df
+        # self.drop_id_column()
+        # self.replace_nan()
+        # self.fix_applicants_invite_format()
+        # self.format_phones()
+        # self.fix_dob_format()
 
         #print(self.applicant_df.to_string())
 
@@ -136,7 +131,7 @@ class Transform_applicant_csv():
     def fix_dob_format(self):
         new_dates = []
         for i in self.applicant_df['dob']:
-            if type(i) != float:
+            if i != 'Unknown':
                 if len(i) != 10:
                     i = i.replace('//', '/')
                 new_dates.append(datetime.datetime.strptime(i, '%d/%m/%Y').date())
@@ -161,8 +156,9 @@ class Transform_applicant_csv():
     def fix_applicants_invite_format(self):
         formatted_dates = []
         for index, row in self.applicant_df.iterrows():
-            if row.invited_date is None or type(row.month) == float:
-                formatted_dates.append(datetime.date(1970,1,1))
+            # if row.invited_date is None or type(row.month) == float:
+            if row.invited_date == 'Unknown' or row.month == 'Unknown':
+                formatted_dates.append(None)
             else:
                 datestring = row.month.split(' ')[0]
                 datestring += ' '
@@ -175,11 +171,40 @@ class Transform_applicant_csv():
         self.applicant_df.drop('month', axis=1, inplace=True)
 
     def replace_nan(self):
-        self.applicant_df.fillna(None, inplace=True)
+        self.applicant_df.fillna('Unknown', inplace=True)
+
 
     def drop_id_column(self):
         self.applicant_df.drop('id', axis=1, inplace=True)
 
+class Transform_sparta_day_txt():
+
+    def __init__(self, sparta_day_df):
+        self.sparta_day_df = sparta_day_df
+        #print(self.sparta_day_df)
+
+
+    def format_date(self):
+        dates = []
+        for index,row in self.sparta_day_df.iterrows():
+
+            dates.append(parse(row.date).date())
+        self.sparta_day_df['date'] = dates
+
+
+    def format_score(self):
+        ps_score = []
+        pr_score = []
+        for index, row in self.sparta_day_df.iterrows():
+            if row.psychometrics == 'SCRIMGEOUR':
+                print('Why the hell is SCRIMGEOUR a result for psychometric testing??')
+                ps_score.append(54)
+                pr_score.append(int(row.presentation.split(': ')[1].split('/')[0]))
+            else:
+                ps_score.append(int(row.psychometrics.split(': ')[1].split('/')[0]))
+                pr_score.append(int(row.presentation.split(': ')[1].split('/')[0]))
+        self.sparta_day_df['psychometrics'] = ps_score
+        self.sparta_day_df['presentation'] = pr_score
 
 
 if __name__ == '__main__':
@@ -190,14 +215,19 @@ if __name__ == '__main__':
     # print(test.talent_df.to_string())
     # print(test.talent_df['geo_flex'].dtype)
     # # test.date_types_changed()
-    t = Transform_applicant_csv('df')
-    t.fix_applicants_invite_format()
-    t.format_phones()
-    t.fix_dob_format()
-    t.replace_nan()
-    t.drop_id_column()
-    print(t.applicant_df.to_string())
 
+
+    # t = Transform_applicant_csv('df')
+    # t.drop_id_column()
+    # t.fix_applicants_invite_format()
+    # t.format_phones()
+    # t.fix_dob_format()
+    # t.replace_nan()
+    # print(t.applicant_df.to_string())
+
+    t = Transform_sparta_day_txt('hello')
+    t.format_date()
+    print(t.sparta_day_df.to_string())
 
 
 
