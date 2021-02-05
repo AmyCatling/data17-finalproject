@@ -34,6 +34,6 @@ def test_columns_are_added():
     assert 'original_file_name' and 'date' and 'course_name' in extract.academy_df.columns
     assert 'original_file_name' in extract.talent_df.columns
     assert 'original_file_name' in extract.applicant_df.columns
-    assert 'original_file_name' and 'name' and 'psychometrics' and 'presentation' in extract.sparta_day_df.columns
+    assert 'original_file_name' and 'academy' and 'date' and 'name' and 'psychometrics' and 'presentation' in extract.sparta_day_df.columns
 
 
