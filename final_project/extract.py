@@ -82,7 +82,7 @@ class Extract:
             df.insert(1, 'course_name', '')
             df.insert(2, 'date', '')
 
-            # df['course_name'], df['date'] = key.split('_', 1)[0][slice(8)], key.split('_', 1)[1][slice(-4)]
+            # df['course_name'], df['date'] = key.split('_', 2)[0, 1][slice(8)], key.split('_', 1)[1][slice(-4)]
             if 'Business' in file:
                 df['course_name'] = file[slice(8, 19)]
                 df['date'] = file[slice(20, 30)]
@@ -133,8 +133,8 @@ class Extract:
             names = []
             psychometric = []
             for index, row in test_df.iterrows():
-                names.append(row['name'].split(' - ')[0])
-                psychometric.append(row['name'].split(' - ')[1])
+                names.append(row['name'].rsplit(' - ', 1)[0]) ###Remove 'r' if this breaks stuff
+                psychometric.append(row['name'].rsplit(' - ', 1)[1])
             test_df['name'] = names
             test_df['psychometrics'] = psychometric
             # test_df[['name', 'psychometrics']] = test_df['name'].str.split('-')[0]
@@ -157,10 +157,10 @@ class Extract:
 
 
 if __name__ == '__main__':
-    instance = Extract('academy_csv')
+    instance = Extract('txt')
     instance.all_data_loader()
-    print(instance.academy_df['course_name'], instance.academy_df['date'])
+    print(instance.academy_df)
     print(instance.talent_df)
     print(instance.applicant_df)
-    print(instance.sparta_day_df)
+    print(instance.sparta_day_df.to_string())
 
