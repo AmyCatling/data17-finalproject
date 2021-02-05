@@ -59,7 +59,9 @@ class Transform_academy_csv():
 
     def deactive_nulls(self):
 
-        self.academy_df = self.academy_df.replace(99, 0)
+        self.academy_df = self.academy_df.replace(99, None)
+        self.academy_df = self.academy_df.replace(0, None)
+
 
 
 
@@ -120,8 +122,13 @@ class Transform_json():
 class Transform_applicant_csv():
 
     def __init__(self, applicant_df):
-        self.applicant_df = pd.read_csv("C:/Users/joest/Downloads/April2019Applicants.csv")
-        #self.applicant_df = applicant_df
+        #self.applicant_df = pd.read_csv("C:/Users/joest/Downloads/April2019Applicants.csv")
+        self.applicant_df = applicant_df
+        self.drop_id_column()
+        self.fix_applicants_invite_format()
+        self.format_phones()
+        self.fix_dob_format()
+        self.replace_nan()
 
         #print(self.applicant_df.to_string())
 
@@ -134,7 +141,7 @@ class Transform_applicant_csv():
                     i = i.replace('//', '/')
                 new_dates.append(datetime.datetime.strptime(i, '%d/%m/%Y').date())
             else:
-                new_dates.append(datetime.date(1970,1,1))
+                new_dates.append(None)
 
         self.applicant_df['dob'] = new_dates
 
@@ -148,7 +155,7 @@ class Transform_applicant_csv():
                 number = number.replace(')', '')
                 numbers.append(number)
             else:
-                numbers.append('Unknown')
+                numbers.append(None)
         self.applicant_df['phone_number'] = numbers
 
     def fix_applicants_invite_format(self):
@@ -168,7 +175,7 @@ class Transform_applicant_csv():
         self.applicant_df.drop('month', axis=1, inplace=True)
 
     def replace_nan(self):
-        self.applicant_df.fillna('Unknown', inplace=True)
+        self.applicant_df.fillna(None, inplace=True)
 
     def drop_id_column(self):
         self.applicant_df.drop('id', axis=1, inplace=True)
