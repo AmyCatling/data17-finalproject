@@ -167,8 +167,14 @@ class Extract:
             test_df.columns = ['name', 'presentation']
             test_df[['name', 'psychometrics']] = test_df['name'].str.split
             test_df['original_file_name'] = key
-            test_df['Academy'] = "placeholder"
-            test_df = test_df[['original_file_name', 'Academy', 'name', 'psychometrics', 'presentation']]
+            s3_object2 = s3_client.get_object(Bucket=bucket_name, Key=key)
+            file2 = s3_object2['Body'].read().decode('utf-8')
+            for line in [file2]:
+                date = [line.split('\r\n')][0][0]
+                academy = [line.split('\r\n')][0][1]
+            test_df['date'] = date
+            test_df['academy'] = academy.split()[0]
+            test_df = test_df[['original_file_name', 'academy', 'date', 'name', 'psychometrics', 'presentation']]
             self.sparta_day_df_list.append(test_df)
         self.sparta_day_df = pd.concat(self.sparta_day_df_list)
 
@@ -178,10 +184,10 @@ class Extract:
 
 
 if __name__ == '__main__':
-    instance = Extract('all')
+    instance = Extract('txt')
     instance.all_data_loader()
-    print(instance.academy_df)
-    print(instance.talent_df)
-    print(instance.applicant_df)
-    print(instance.sparta_day_df)
+    # print(instance.academy_df)
+    # print(instance.talent_df)
+    # print(instance.applicant_df)
+    print(instance.sparta_day_df.to_string())
 
