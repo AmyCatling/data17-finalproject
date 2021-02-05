@@ -125,8 +125,8 @@ class Extract:
                 df['course_name'] = key[slice(8, 22)]
                 df['date'] = key[slice(23, 33)]
 
-            for column in df:
-                df[column].fillna(101, inplace=True)  ### REMOVE IF THIS BREAKS ANYTHING
+            # for column in df:
+            #     df[column].fillna(101, inplace=True)  ### REMOVE IF THIS BREAKS ANYTHING
             self.academy_csv_df_list.append(df)
         self.academy_df = pd.concat(self.academy_csv_df_list)
 
