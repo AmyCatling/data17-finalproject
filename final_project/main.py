@@ -16,26 +16,26 @@ def json_load():
     extractor.all_data_loader()
     transformer = Transform_json(extractor.talent_df)
     #print(transformer.talent_df.to_string())
-    #loader = LoadData(load_choice='talent', df=transformer.talent_df)
+    loader = LoadData(load_choice='talent', df=transformer.talent_df)
 
 def applicant_load():
     extractor = Extract('applicant_csv')
     extractor.all_data_loader()
     transformer = Transform_applicant_csv(extractor.applicant_df)
+    loader = LoadData(load_choice='applicant', df=transformer.applicant_df)
 
 
 def sparta_day_load():
     extractor = Extract('txt')
     extractor.all_data_loader()
     transformer = Transform_sparta_day_txt(extractor.sparta_day_df)
-    transformer.format_date()
-    #transformer.format_score()
-    print(transformer.sparta_day_df.to_string())
+    loader = LoadData(load_choice='sparta_day', df=transformer.sparta_day_df)
+
+
 
 #json_load()
-#academy_load()
-
-#applicant_load()
+academy_load()
+applicant_load()
 sparta_day_load()
 
 
