@@ -8,13 +8,9 @@ import boto3
 
 class Extract:
     def __init__(self, filechoice, devcounter=False):
-        # create empty lists and attributes
-        self.bucket_contents = []
-
-        self.academy_csv_file_names_list = []
-        self.applicant_csv_file_names_list = []
-        self.json_file_names_list = []
-        self.txt_file_names_list = []
+        # call methods
+        self.get_bucket_contents()
+        self.items_in_bucket = [item['Key'] for item in self.bucket_contents]
 
         self.academy_csv_df_list = []
         self.applicant_csv_df_list = []
@@ -29,13 +25,12 @@ class Extract:
         self.filechoice = filechoice
         self.devcounter = devcounter
 
-        # call methods
-        self.get_bucket_contents()
-
 
     # function to retrieve everything from a bucket (>1000 items)
     def get_bucket_contents(self):
         kwargs = {'Bucket': bucket_name}
+        self.bucket_contents = []
+
         while True:
             resp = s3_client.list_objects_v2(**kwargs)
             for obj in resp['Contents']:
@@ -47,89 +42,59 @@ class Extract:
 
     # function to call retrieval functions for the specified file type
     def all_data_loader(self):
-        if self.filechoice == 'json':
-            self.retrieve_json_file_names()
-
-        elif self.filechoice == 'academy_csv':
-            self.retrieve_academy_csv_file_names()
-
-        elif self.filechoice == 'applicant_csv':
-            self.retrieve_applicant_csv_file_names()
-
-        elif self.filechoice == 'txt':
-            self.retrieve_txt_file_names()
-
-        elif self.filechoice == 'all':
-            self.retrieve_json_file_names()
-            self.retrieve_academy_csv_file_names()
-            self.retrieve_applicant_csv_file_names()
-            self.retrieve_txt_file_names()
-
-    def retrieve_file_names(self, filechoice, location):
-        pass
-        # print(type(self.bucket_contents))
-        # items_in_bucket = [item['Key'] for item in self.bucket_contents]
-        # exec(f"global all_Academy_csv; all_Academy_csv = file for file in fnmatch.filter(items_in_bucket, '{location}/*.{filechoice}')")
-        # print(all_Academy_csv)
-        # self.academy_csv_to_df()
+        if self.filechoice == 'all':
+            for i in ['json', 'academy_csv', 'applicant_csv', 'txt']:
+                exec(f'self.retrieve_{i}_file_names()')
+                exec(f'self.{i}_to_df()')
+        else:
+            exec(f'self.retrieve_{self.filechoice}_file_names()')
+            exec(f'self.{self.filechoice}_to_df()')
 
     # 4 functions to retrieve files of each format
     def retrieve_academy_csv_file_names(self):
-        items_in_bucket = [item['Key'] for item in self.bucket_contents]
-        all_csv = fnmatch.filter(items_in_bucket, '*.csv')
-        applicant_csvs = fnmatch.filter(items_in_bucket, '*Applicants.csv')
-        self.academy_csv_file_names_list = [file for file in all_csv if file not in applicant_csvs]
-        print(self.academy_csv_file_names_list)
+        self.academy_csv_file_names_list = [file for file
+                                            in fnmatch.filter(self.items_in_bucket, '*.csv')
+                                            if file not in fnmatch.filter(self.items_in_bucket, '*Applicants.csv')]
         print(f"A total of {len(self.academy_csv_file_names_list)} Academy csv files were found in Amazon S3")
-        
-        self.academy_csv_to_df()
 
     def retrieve_applicant_csv_file_names(self):
-        items_in_bucket = [item['Key'] for item in self.bucket_contents]
-        self.applicant_csv_file_names_list = fnmatch.filter(items_in_bucket, '*Applicants.csv')
-        print(self.applicant_csv_file_names_list)
+        self.applicant_csv_file_names_list = fnmatch.filter(self.items_in_bucket, '*Applicants.csv')
         print(f"A total of {len(self.applicant_csv_file_names_list)} Applicant csv files were found in Amazon S3")
-        self.applicant_csv_to_df()
 
     def retrieve_json_file_names(self):
-        items_in_bucket = [item['Key'] for item in self.bucket_contents]
-        self.json_file_names_list = fnmatch.filter(items_in_bucket, '*.json')
-        print(self.json_file_names_list)
+        self.json_file_names_list = fnmatch.filter(self.items_in_bucket, '*.json')
         print(f"A total of {len(self.json_file_names_list)} json files were found in Amazon S3")
-        self.json_to_df()
 
     def retrieve_txt_file_names(self):
-        items_in_bucket = [item['Key'] for item in self.bucket_contents]
-        self.txt_file_names_list = fnmatch.filter(items_in_bucket, '*.txt')
+        self.txt_file_names_list = fnmatch.filter(self.items_in_bucket, '*.txt')
         print(f"A total of {len(self.txt_file_names_list)} txt files were found in Amazon S3")
-        print(self.txt_file_names_list)
-        self.txt_to_df()
 
+    #4 functions to get files from S3, add columns and convert to dataframes
     def academy_csv_to_df(self):
         for file in self.academy_csv_file_names_list:
             key = file
             s3_object = s3_client.get_object(Bucket=bucket_name, Key=key)
             file = s3_object['Body']
             df = pd.read_csv(file)
+
             df.insert(0, 'original_file_name', '')
             df['original_file_name'] = key
             df.insert(1, 'course_name', '')
             df.insert(2, 'date', '')
-            if 'Business' in key:
-                df['course_name'] = key[slice(8, 19)]
-                df['date'] = key[slice(20, 30)]
-            elif 'Data' in key:
-                df['course_name'] = key[slice(8, 15)]
-                df['date'] = key[slice(16, 26)]
-            elif 'Engineering' in key:
-                df['course_name'] = key[slice(8, 22)]
-                df['date'] = key[slice(23, 33)]
 
-            # for column in df:
-            #     df[column].fillna(101, inplace=True)  ### REMOVE IF THIS BREAKS ANYTHING
+            # df['course_name'], df['date'] = key.split('_', 1)[0][slice(8)], key.split('_', 1)[1][slice(-4)]
+            if 'Business' in file:
+                df['course_name'] = file[slice(8, 19)]
+                df['date'] = file[slice(20, 30)]
+            elif 'Data' in file:
+                df['course_name'] = file[slice(8, 15)]
+                df['date'] = file[slice(16, 26)]
+            elif 'Engineering' in file:
+                df['course_name'] = file[slice(8, 22)]
+                df['date'] = file[slice(23, 33)]
+
             self.academy_csv_df_list.append(df)
         self.academy_df = pd.concat(self.academy_csv_df_list)
-
 
     def applicant_csv_to_df(self):
         for file in self.applicant_csv_file_names_list:
@@ -186,16 +151,16 @@ class Extract:
         self.sparta_day_df = pd.concat(self.sparta_day_df_list)
 
     def create_csv(self):
-        self.talent_df.to_csv(r'C:\Users\lucio\PycharmProjects\data17-finalproject\talent.csv', index=False)
-        self.academy_df.to_csv(r'C:\Users\lucio\PycharmProjects\data17-finalproject\academy.csv', index=False)
+        pass
+        # self.talent_df.to_csv(r'C:\Users\lucio\PycharmProjects\data17-finalproject\talent.csv', index=False)
+        # self.academy_df.to_csv(r'C:\Users\lucio\PycharmProjects\data17-finalproject\academy.csv', index=False)
 
 
 if __name__ == '__main__':
-    instance = Extract('all')
+    instance = Extract('academy_csv')
     instance.all_data_loader()
-    print(instance.academy_df)
+    print(instance.academy_df['course_name'], instance.academy_df['date'])
     print(instance.talent_df)
     print(instance.applicant_df)
     print(instance.sparta_day_df)
-    print(instance.sparta_day_df.to_string())
 
