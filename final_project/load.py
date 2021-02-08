@@ -16,6 +16,12 @@ class LoadData:
         elif load_choice == 'academy':
             self.academy_df = df
             self.import_academy_data()
+        elif load_choice == 'applicant':
+            self.applicant_df = df
+            self.import_applicant_data()
+        elif load_choice == 'sparta_day':
+            self.sparta_day_df = df
+            self.import_sparta_day_data()
 
     def import_talent_data(self):  # import talent team data
         for index, row in self.talent_df.iterrows():
@@ -126,6 +132,25 @@ class LoadData:
         self.conn.commit()
         print('Academy Updated')
 
+    def import_applicant_data(self):
+        for index, row in self.applicant_df.iterrows():
+            self.conn.execute('INSERT INTO Applicants(original_file_name, name, gender, dob,\
+                              email, city, address, postcode, uni,\
+                              degree, invited_date, invited_by) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',row['original_file_name'], row['name'], row['gender'],
+                              row['dob'], row['email'], row['city'], row['address'],
+                              row['postcode'], row['uni'], row['degree'], row['invited_date'], row['invited_by'])
+        self.conn.commit()
+        print('applicant data loaded')
+
+    def import_sparta_day_data(self):
+        for index, row in self.sparta_day_df.iterrows():
+            self.conn.execute('INSERT INTO Sparta_day(original_file_name, academy, date, name,\
+                              psychometrics_100, presentation_32) VALUES (?,?,?,?,?,?)',row['original_file_name'], row['academy'], row['date'],
+                              row['name'], row['psychometrics'], row['presentation'])
+        self.conn.commit()
+        print('sparta day data loaded')
 
 if __name__ == "__main__":
     load = LoadData()
+
+
