@@ -1,5 +1,5 @@
 import fnmatch
-from final_project.config import s3_client, bucket_name, bucket_contents
+from final_project.config import s3_client, bucket_name, bucket_contents, files_list
 import pandas as pd
 import json
 from pprint import pprint
@@ -12,8 +12,9 @@ class Extract:
         logging.info(f"------  initialised {__name__} class  ------")
         # call methods
         self.get_bucket_contents()
-        self.items_in_bucket = [item['Key'] for item in self.bucket_contents]
-        # self.data_checker()
+        self.keys_in_bucket = [item['Key'] for item in self.bucket_contents]
+        self.items_in_bucket = []
+        self.data_checker()
 
         self.academy_csv_df_list = []
         self.applicant_csv_df_list = []
@@ -43,11 +44,11 @@ class Extract:
             except KeyError:
                 break
 
-    # def data_checker(self):
-    #     for file in self.items_in_bucket:
-    #         if file  not in files_list:
-    #
-
+    def data_checker(self):
+        for file in self.keys_in_bucket:
+            if file not in files_list:
+                self.items_in_bucket.append(file)
+                files_list.append(file)
 
     # function to call retrieval functions for the specified file type
     def all_data_extractor(self):
@@ -170,11 +171,8 @@ class Extract:
         # self.academy_df.to_csv(r'C:\Users\lucio\PycharmProjects\data17-finalproject\academy.csv', index=False)
 
 
+
+
 if __name__ == '__main__':
     instance = Extract('all')
-    instance.all_data_extractor()
-    print(instance.academy_df)
-    print(instance.talent_df)
-    print(instance.applicant_df)
-    print(instance.sparta_day_df.to_string())
 
