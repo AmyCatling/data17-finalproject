@@ -9,7 +9,7 @@ import logging
 
 
 class Transform_academy_csv():
-    def init(self, academy_df):
+    def __init__(self, academy_df):
         # This is a temporary filepath, will inheret filepath
         # self.academy_df = pd.read_csv("C:/Users/joest/Downloads/Data_29_2019-03-04.csv")
         self.academy_df = academy_df
@@ -21,6 +21,9 @@ class Transform_academy_csv():
         self.null_rename()
         self.deactive_nulls()
         logging.info("test logging")
+        self.format_string_tables(academy_df, 'invited_by')
+        #self.format_string_tables(self.academy_df, '')
+
 
     def add_columns(self):
         # Create a new column for the Spartan's status, initially populated with Y values
@@ -62,7 +65,7 @@ class Transform_academy_csv():
 
 
 class Transform_json():
-    def init(self, talent_df):
+    def __init__(self, talent_df):
         # f = open("C:/Users/joest/Downloads/10383.json")
         # j = json.load(f)
         # self.talent_df = pd.DataFrame([j])
@@ -73,6 +76,7 @@ class Transform_json():
         self.format_known_tech()
         self.format_stren_weak()
         self.encode_columns()
+
 
     def json_active_bits(self):
 
@@ -158,6 +162,11 @@ class Transform_applicant_csv():
         self.format_phones()
         self.fix_dob_format()
         format_string_tables(applicant_df, 'gender')
+        format_string_tables(applicant_df, 'city')
+        format_string_tables(applicant_df, 'academy')
+        format_string_tables(applicant_df, 'degree')
+        format_string_tables(applicant_df, 'uni')
+
 
         #print(self.applicant_df.to_string())
 
@@ -244,9 +253,12 @@ class Transform_sparta_day_txt():
         self.sparta_day_df['presentation'] = pr_score
 
 
-def format_string_tables(df, column_name, ):
-    unique = set(df[column_name])
+def format_string_tables(df, column_name):
+    unique = list(set(df[column_name]))
     f = LoadData(column_name, unique)
+
+#def take_column_name(df, column_name):
+
 
 
 if __name__ == '__main__':

@@ -16,21 +16,40 @@ class LoadData:
         except:
             logging.error("Failed to connect to database")
 
-        if load_choice == 'talent':
-            self.talent_df = df
-            self.import_talent_data()
-        elif load_choice == 'academy':
-            self.academy_df = df
-            self.import_academy_data()
-        elif load_choice == 'applicant':
-            self.applicant_df = df
-            self.import_applicant_data()
-        elif load_choice == 'sparta_day':
-            self.sparta_day_df = df
-            self.import_sparta_day_data()
+        # if load_choice == 'talent':
+        #     self.talent_df = df
+        #     self.import_talent_data()
+        # elif load_choice == 'academy':
+        #     self.academy_df = df
+        #     self.import_academy_data()
+        # elif load_choice == 'applicant':
+        #     self.applicant_df = df
+        #     self.import_applicant_data()
+        # elif load_choice == 'sparta_day':
+        #     self.sparta_day_df = df
+        #     self.import_sparta_day_data()
         if load_choice == 'strength':
             self.strength_list = df
             self.import_strength()
+        elif load_choice == 'tech':
+            self.technologies = df
+            self.import_technologies()
+        elif load_choice == 'gender':
+            self.gender_list = df
+            self.import_gender()
+        elif load_choice == 'city':
+            self.cities_list = df
+            self.import_city()
+        elif load_choice == 'academy':
+            self.academy_list = df
+            self.import_academy()
+        elif load_choice == 'degree':
+            self.degree_grade_list = df
+            self.import_degree_grade()
+        elif load_choice == 'uni':
+            self.university_list = df
+            self.import_university_details()
+
         # if load_choice == 'weakness':
         #     self.weakness_list = df
         #     self.import_weakness()
@@ -43,11 +62,11 @@ class LoadData:
         self.conn.execute("SELECT behaviour_name FROM Behaviours")
         self.conn.execute("INSERT INTO behaviours (behaviour_name) VALUES (?), behaviour_name")
 
-    def import_academies(self):
-        for index, row in self.sparta_day_df.iterrows():
+    def import_academy(self):
+        for academy in self.academy_list:
             check = self.conn.execute('SELECT academy_location FROM Academies WHERE academy_location = ?', academy)
             try:
-                row == check.fetchone()[0]
+                academy == check.fetchone()[0]
                 pass
             except TypeError:
                 logging.info(f'The {check} is not in the Academies table. {check} will now be inserted')
@@ -69,14 +88,14 @@ class LoadData:
                 self.conn.execute('INSERT INTO Technologies (skill_name) VALUES (?)', tech)
             self.conn.commit()
 
-    def import_strength(self):
+    def import_strengths(self):
+        check = self.conn.execute('SELECT strength_name FROM Strengths').fetchall()
         for strength in self.strength_list:
-            check = self.conn.execute('SELECT strength_name FROM Strengths WHERE strength_name = ?', strength)
             try:
-                strength == check.fetchone()[0]
-                pass
+                if strength in check:
+                    pass
             except TypeError:
-                logging.info(f'The {check} is not the Strengths table. {check} will now be inserted')
+                logging.info(f'Insert {strength}')
                 self.conn.execute('INSERT INTO Strengths (strength_name) VALUES (?)', strength)
             self.conn.commit()
 
@@ -84,7 +103,7 @@ class LoadData:
         for weakness in self.weaknesses:
             check = self.conn.execute('SELECT weakness_name FROM Weaknesses WHERE weakness_name = ?', weakness)
             try:
-                weakness = check.fetchone()[0]
+                weakness == check.fetchone()[0]
                 pass
             except TypeError:
                 logging.info(f'The {check} is not in the Weaknesses table. {check} will now be inserted')
@@ -93,10 +112,10 @@ class LoadData:
 
 
     def import_gender(self):
-        for index, row in self.academy_df.iterrow():
+        for gender in self.gender_list:
             check = self.conn.execute('SELECT gender FROM Gender WHERE gender = ?', gender)
             try:
-                row = check.fetchone()[0]
+                gender = check.fetchone()[0]
                 pass
             except TypeError:
                 logging.info(f'The {check} is not in the Gender table. {check} will now be inserted')
@@ -105,28 +124,35 @@ class LoadData:
 
 
     def import_city(self):
-        self.conn.execute("SELECT city_name FROM City")
-        self.conn.execute("INSERT INTO City (city_name) VALUES (?)", city)
+        for city in self.cities_list:
+            check = self.conn.execute('SELECT city FROM WHERE city = ?', city)
+            try:
+                city = check.fetchone()[0]
+                pass
+            except TypeError:
+                logging.info(f' The {check} is not in the City table. {check} will now be inserted')
+                self.conn.execute('INSERT INTO City (city_name) VALUES (?)', city)
+            self.conn.commit()
 
 
     def import_university_details(self):
         #I don't know the column name or if I need iterrows plz help
-        for university in self.applicant_df['uni']:
+        for university in self.university_list:
             check = self.conn.execute('SELECT university_name FROM University_Details WHERE = ?', university)
             try:
                 university = check.fetchone()[0]
                 pass
             except TypeError:
-                logging.info(f'The {check} is not in the University_Details table. {check} will not be inserted')
+                logging.info(f'The {check} is not in the University_Details table. {check} will now be inserted')
                 self.conn.execute('INSERT INTO University_Details (university) VALUES (?)', university)
             self.conn.commit()
 
 
     def import_degree_grade(self):
-        for index, row in self.academy_df.iterrow():
+        for grade in self.degree_grade_list:
             check = self.conn.execute('SELECT classification FROM Degree_Grade WHERE classification = ?', grade)
             try:
-                row = check.fetchone()[0]
+                grade = check.fetchone()[0]
                 pass
             except TypeError:
                 logging.info(f'The {check} is not in the Degree_Grade table. {check} will now be inserted')
@@ -146,8 +172,8 @@ class LoadData:
     def import_applicants(self):
         self.conn.execute('INSERT INTO Applicants (name, gender_id, dob, email, city_id, address, postcode,\
                            phone_number, university_id, degree_grade_id, staff_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
-                           name, gender_id, dob, email, city_id, address, postcode, phone_number, university_id,
-                           degree_grade_id, staff_id)
+                          name, gender_id, dob, email, city_id, address, postcode, phone_number, university_id,
+                          degree_grade_id, staff_id)
         self.conn.commit()
 
 
@@ -162,7 +188,7 @@ class LoadData:
 
 
 
-   def import_student(self):
+def import_student(self):
         pass
 
 
