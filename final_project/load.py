@@ -7,21 +7,27 @@ import logging
 
 class LoadData:
     def init(self, load_choice, df):  # initialisation
-        self.conn = pyodbc.connect(
-            'DRIVER={ODBC Driver 17 for SQL Server};SERVER=' + server +
-            ';DATABASE=' + database + ';UID=' + username + ';PWD=' + password)
-        # if load_choice == 'talent':
-        #     self.talent_df = df
-        #     self.import_talent_data()
-        # elif load_choice == 'academy':
-        #     self.academy_df = df
-        #     self.import_academy_data()
-        # elif load_choice == 'applicant':
-        #     self.applicant_df = df
-        #     self.import_applicant_data()
-        # elif load_choice == 'sparta_day':
-        #     self.sparta_day_df = df
-        #     self.import_sparta_day_data()
+        logging.info("----- Initialised LoadData class -----")
+        try:
+            self.conn = pyodbc.connect(
+                'DRIVER={ODBC Driver 17 for SQL Server};SERVER=' + server +
+                ';DATABASE=' + database + ';UID=' + username + ';PWD=' + password)
+            logging.info("Successfully connected to database")
+        except:
+            logging.error("Failed to connect to database")
+
+        if load_choice == 'talent':
+            self.talent_df = df
+            self.import_talent_data()
+        elif load_choice == 'academy':
+            self.academy_df = df
+            self.import_academy_data()
+        elif load_choice == 'applicant':
+            self.applicant_df = df
+            self.import_applicant_data()
+        elif load_choice == 'sparta_day':
+            self.sparta_day_df = df
+            self.import_sparta_day_data()
         if load_choice == 'strength':
             self.strength_list = df
             self.import_strength()
@@ -146,16 +152,24 @@ class LoadData:
 
 
     def import_weekly_results(self):
-        pass
+        for something in somewhere:
+            try:
+                self.conn.execute("SELECT applicant_id, behaviour_id, week_number, score FROM Weekly_Results",)
 
     def import_courses(self):
+        for index, row in self.import
+        self.conn.execute('INSERT INTO ('course_name', row.)
 
 
 
    def import_student(self):
+        pass
 
 
 
+
+   def import_sparta_day_interview():
+        self.conn
 
 
 
