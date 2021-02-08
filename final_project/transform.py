@@ -19,7 +19,6 @@ class Transform_academy_csv():
         self.floats_to_ints()
         self.null_rename()
         self.deactive_nulls()
-        print(self.academy_df.to_string())
 
 
 
@@ -61,7 +60,7 @@ class Transform_academy_csv():
 
         self.academy_df = self.academy_df.replace(99, np.nan)
         self.academy_df = self.academy_df.replace(0, np.nan)
-        self.academy_df.fillna(None, inplace=True)
+        self.academy_df.fillna(0, inplace=True)
 
 class Transform_json():
     def __init__(self, talent_df):
@@ -117,13 +116,13 @@ class Transform_json():
 class Transform_applicant_csv():
 
     def __init__(self, applicant_df):
-        self.applicant_df = pd.read_csv("C:/Users/joest/Downloads/April2019Applicants.csv")
-        # self.applicant_df = applicant_df
-        # self.drop_id_column()
-        # self.replace_nan()
-        # self.fix_applicants_invite_format()
-        # self.format_phones()
-        # self.fix_dob_format()
+        #self.applicant_df = pd.read_csv("C:/Users/joest/Downloads/April2019Applicants.csv")
+        self.applicant_df = applicant_df
+        self.drop_id_column()
+        self.replace_nan()
+        self.fix_applicants_invite_format()
+        self.format_phones()
+        self.fix_dob_format()
 
         #print(self.applicant_df.to_string())
 
@@ -181,6 +180,8 @@ class Transform_sparta_day_txt():
 
     def __init__(self, sparta_day_df):
         self.sparta_day_df = sparta_day_df
+        self.format_score()
+        self.format_date()
         #print(self.sparta_day_df)
 
 
@@ -227,6 +228,7 @@ if __name__ == '__main__':
 
     t = Transform_sparta_day_txt('hello')
     t.format_date()
+    t.format_score()
     print(t.sparta_day_df.to_string())
 
 
