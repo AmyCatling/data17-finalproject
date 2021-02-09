@@ -257,6 +257,8 @@ class Transform_sparta_day_txt():
 
 
 def format_string_tables(df, column_name):
+    # Used for the one column tables, takes a column of a DF, turns into set to remove duplicates
+    # then assigns it to a list so it can be iterated through in load
     unique = list(set(df[column_name]))
     f = LoadData(column_name, unique)
 
