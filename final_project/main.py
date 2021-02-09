@@ -36,9 +36,9 @@ def sparta_day_load():
 
 try:
     json_load()
-    academy_load()
-    applicant_load()
-    sparta_day_load()
+    # academy_load()
+    # applicant_load()
+    # sparta_day_load()
 except:
     logging.error("Code is broke lol")
     raise
