@@ -1,29 +1,32 @@
-
-#Check final dates
+# Check final dates
 import json
 import pandas as pd
 import numpy as np
 import datetime
 from dateutil.parser import parse
+from final_project.load import LoadData
+import logging
 
 
 class Transform_academy_csv():
     def __init__(self, academy_df):
-        #This is a temporary filepath, will inheret filepath
-        #self.academy_df = pd.read_csv("C:/Users/joest/Downloads/Data_29_2019-03-04.csv")
+        # This is a temporary filepath, will inheret filepath
+        # self.academy_df = pd.read_csv("C:/Users/joest/Downloads/Data_29_2019-03-04.csv")
         self.academy_df = academy_df
-        #super().__init__()
+        # super().init()
 
         self.add_columns()
         self.active_nulls()
         self.floats_to_ints()
         self.null_rename()
         self.deactive_nulls()
-
+        logging.info("test logging")
+        self.format_string_tables(academy_df, 'invited_by')
+        #self.format_string_tables(self.academy_df, '')
 
 
     def add_columns(self):
-        #Create a new column for the Spartan's status, initially populated with Y values
+        # Create a new column for the Spartan's status, initially populated with Y values
 
         row_list = []
         for i in range(len(self.academy_df.index.values)):
@@ -31,7 +34,7 @@ class Transform_academy_csv():
         self.academy_df.insert(4, "Active", row_list, True)
 
     def active_nulls(self):
-        #Null values are replaced with 99, an obviously false value
+        # Null values are replaced with 99, an obviously false value
         for column in self.academy_df:
             if "_W" in column:
                 if "_W9" not in column and "_W10" not in column:
@@ -48,19 +51,18 @@ class Transform_academy_csv():
                 active_list.append('Y')
         self.academy_df['Active'] = active_list
 
-
-
     def floats_to_ints(self):
-        #The characteristic columns all contain a "_W" so they can be found that way
+        # The characteristic columns all contain a "_W" so they can be found that way
         for column in self.academy_df:
             if "_W" in column:
-                    self.academy_df[column] = self.academy_df[column].astype(int)
+                self.academy_df[column] = self.academy_df[column].astype(int)
 
     def deactive_nulls(self):
 
         self.academy_df = self.academy_df.replace(99, np.nan)
         self.academy_df = self.academy_df.replace(0, np.nan)
         self.academy_df.fillna(0, inplace=True)
+
 
 class Transform_json():
     def __init__(self, talent_df):
@@ -71,12 +73,14 @@ class Transform_json():
         self.json_active_bits()
         self.fix_nulls()
         self.date_types_changed()
+        self.format_known_tech()
+        self.format_stren_weak()
         self.encode_columns()
 
 
     def json_active_bits(self):
 
-        relevant_columns = ['self_development','geo_flex','financial_support_self', 'result']
+        relevant_columns = ['self_development', 'geo_flex', 'financial_support_self', 'result']
 
         for column in relevant_columns:
             column_list = []
@@ -113,6 +117,40 @@ class Transform_json():
         self.talent_df['strengths'] = strengths
         self.talent_df['weaknesses'] = weaknesses
 
+    def format_known_tech(self):
+        technologies = []
+        for index, row in self.talent_df.iterrows():
+            # print(type(row.tech_self_score))
+            if type(row.tech_self_score) != dict:
+                pass
+            else:
+                for tech in row.tech_self_score.keys():
+                    if tech not in technologies:
+                        technologies.append(tech)
+        f = LoadData('tech', technologies)
+
+    def format_stren_weak(self):
+        stren = []
+        weak = []
+        for index, row in self.talent_df.iterrows():
+            # print(type(row.tech_self_score))
+            if type(row.strengths) != list:
+                pass
+            else:
+                for s in row.strengths:
+                    if s not in stren:
+                        stren.append(s)
+
+            if type(row.weaknesses) != list:
+                pass
+            else:
+                for w in row.weaknesses:
+                    if w not in weak:
+                        weak.append(w)
+        f = LoadData('strength', stren)
+        g = LoadData('weakness', weak)
+
+
 class Transform_applicant_csv():
 
     def __init__(self, applicant_df):
@@ -123,6 +161,12 @@ class Transform_applicant_csv():
         self.fix_applicants_invite_format()
         self.format_phones()
         self.fix_dob_format()
+        format_string_tables(applicant_df, 'gender')
+        format_string_tables(applicant_df, 'city')
+        format_string_tables(applicant_df, 'academy')
+        format_string_tables(applicant_df, 'degree')
+        format_string_tables(applicant_df, 'uni')
+
 
         #print(self.applicant_df.to_string())
 
@@ -176,6 +220,7 @@ class Transform_applicant_csv():
     def drop_id_column(self):
         self.applicant_df.drop('id', axis=1, inplace=True)
 
+
 class Transform_sparta_day_txt():
 
     def __init__(self, sparta_day_df):
@@ -208,6 +253,14 @@ class Transform_sparta_day_txt():
         self.sparta_day_df['presentation'] = pr_score
 
 
+def format_string_tables(df, column_name):
+    unique = list(set(df[column_name]))
+    f = LoadData(column_name, unique)
+
+#def take_column_name(df, column_name):
+
+
+
 if __name__ == '__main__':
     # test = Transform_json()
     # test.talent_df['self_development'] = 'No'
@@ -216,7 +269,6 @@ if __name__ == '__main__':
     # print(test.talent_df.to_string())
     # print(test.talent_df['geo_flex'].dtype)
     # # test.date_types_changed()
-
 
     # t = Transform_applicant_csv('df')
     # t.drop_id_column()
@@ -230,8 +282,3 @@ if __name__ == '__main__':
     t.format_date()
     t.format_score()
     print(t.sparta_day_df.to_string())
-
-
-
-
-

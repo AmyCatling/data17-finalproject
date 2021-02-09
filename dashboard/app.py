@@ -15,7 +15,7 @@ import plotly.graph_objects as go
 
 # CONNECT TO DB -- NEEDS TO BE CONFIG'D
 server = 'localhost,1433'
-database = 'Northwind'
+database = 'Sparta_Db'
 username = 'SA'
 password = 'Passw0rd2018'
 docker_Northwind = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server} ;SERVER='+server+'; DATABASE='+database+'; UID='+username+';PWD='+password)
@@ -31,24 +31,16 @@ colors = {
     'text': '#111111'
 }
 
-# GET CATEGORY NAMES AND AVG PRICES FROM NORTHWIND
-df = pd.read_sql('''
- SELECT c.CategoryName, AVG(p.UnitPrice) AS AveragePrice
- FROM Categories c
- JOIN Products p ON p.CategoryID = c.CategoryID
- GROUP by c.CategoryName
- ORDER BY AveragePrice DESC
-''', docker_Northwind)
-
 
 # GET SPARTAN NAMES FROM TEST TABLE
 df2 = pd.read_sql('''
-    SELECT * FROM test
+    SELECT * FROM Academy
 ''', docker_Northwind)
 available_indicators = []
 for name in df2['name']:
     available_indicators.append(name)
 dftemp = df2.set_index('name')
+print(dftemp.to_string())
 
 
 #SPARTA LOGO
