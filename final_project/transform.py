@@ -21,6 +21,7 @@ class Transform_academy_csv():
         self.null_rename()
         self.deactive_nulls()
         logging.info("test logging")
+        format_string_tables()
         #self.format_string_tables(self.academy_df, '')
 
 

@@ -227,15 +227,6 @@ class LoadData:
                               row.postcode, row.phone_number, uni_id, grade_id, staff_id)
             self.conn.commit()
 
-        # self.conn.execute("SELECT gender_id FROM Gender WHERE gender = ")
-        # self.conn.execute("SELECT city_id FROM City WHERE city_name = ")
-        # self.conn.execute("SELECT university_id FROM University_Details
-        #         # WHERE university_name =  ")
-        # self.conn.execute("SELECT degree_grade_id FROM Degree_Grade WHERE classification = " )
-
-
-
-
     def import_weekly_results(self):
         for something in somewhere:
             try:
