@@ -19,6 +19,11 @@ class Transform_academy_csv:
         self.null_rename()
         self.deactive_nulls()
         logging.info("test logging")
+        self.behaviour_take_column_name()
+        format_string_tables(academy_df, "trainer")
+        format_string_tables(academy_df, "course_name")
+
+
 
     # Create a new column for the Spartan's status, initially populated with Y values
     def add_columns(self):
@@ -61,7 +66,7 @@ class Transform_academy_csv:
 
     # Taking the Sparta Behaviours from the academy_df and producing a list of the unique behaviours
     # Then send it to LoadData
-    def take_column_name(self):
+    def behaviour_take_column_name(self):
         # print(self.academy_df.columns)
         # self.skills_list = []
         # for i in self.academy_df.columns:
@@ -70,6 +75,7 @@ class Transform_academy_csv:
         self.skills_list = [i[0: -3] for i in self.academy_df.columns if "_W2" in i]
         # print(self.skills_list)
         f = LoadData('behaviours', self.skills_list)
+        #
 
 
 # Class for transforming the Talent Day json dataframe
@@ -175,11 +181,12 @@ class Transform_applicant_csv:
         self.fix_applicants_invite_format()
         self.format_phones()
         self.fix_dob_format()
-        format_string_tables(applicant_df, 'academy')
         format_string_tables(applicant_df, 'gender')
         format_string_tables(applicant_df, 'city')
+        format_string_tables(applicant_df, 'uni_details')
         format_string_tables(applicant_df, 'degree')
-        format_string_tables(applicant_df, 'uni')
+        format_string_tables(applicant_df, "invited_by")
+
         #print(self.applicant_df.to_string())
 
     # Changing the data type of the date to datetime
@@ -243,6 +250,7 @@ class Transform_sparta_day_txt:
         self.sparta_day_df = sparta_day_df
         self.format_score()
         self.format_date()
+        format_string_tables(sparta_day_df, 'academy')
         #print(self.sparta_day_df)
 
     # Taking the date from the top of the txt file and put it into a list to put it into a column in the dataframe
@@ -275,7 +283,8 @@ def format_string_tables(df, column_name):
     f = LoadData(column_name, unique)
 
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
+
     # test = Transform_json()
     # test.talent_df['self_development'] = 'No'
     # print(test.talent_df.to_string())
@@ -297,4 +306,4 @@ if __name__ == '__main__':
     # t.format_score()
     # print(t.sparta_day_df.to_string())
 
-    test = Transform_academy_csv()
+    # test = Transform_academy_csv()
