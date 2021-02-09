@@ -1,4 +1,4 @@
-# Check final dates
+# Import modules
 import json
 import pandas as pd
 import numpy as np
@@ -10,28 +10,24 @@ import logging
 
 class Transform_academy_csv():
     def __init__(self, academy_df):
-        # This is a temporary filepath, will inheret filepath
-        # self.academy_df = pd.read_csv("C:/Users/joest/Downloads/Data_29_2019-03-04.csv")
         self.academy_df = academy_df
-        # super().init()
-
         self.add_columns()
         self.active_nulls()
         self.floats_to_ints()
         self.null_rename()
         self.deactive_nulls()
         logging.info("test logging")
-        self.format_string_tables(academy_df, 'invited_by')
-        #self.format_string_tables(self.academy_df, '')
+        # self.format_string_tables(academy_df, 'invited_by')
+        self.take_column_name()
 
 
     def add_columns(self):
         # Create a new column for the Spartan's status, initially populated with Y values
-
         row_list = []
         for i in range(len(self.academy_df.index.values)):
             row_list.append("Y")
         self.academy_df.insert(4, "Active", row_list, True)
+        logging.info("Successfully added active column")
 
     def active_nulls(self):
         # Null values are replaced with 99, an obviously false value
@@ -43,6 +39,7 @@ class Transform_academy_csv():
                     self.academy_df[column].fillna(0, inplace=True)
 
     def null_rename(self):
+        # If column equal to 99, removed from course, else trainee graduated
         active_list = []
         for index, row in self.academy_df.iterrows():
             if 99 in row.values:
@@ -63,6 +60,15 @@ class Transform_academy_csv():
         self.academy_df = self.academy_df.replace(0, np.nan)
         self.academy_df.fillna(0, inplace=True)
 
+    def take_column_name(self):
+        print(self.academy_df.columns)
+        # self.skills_list = []
+        # for i in self.academy_df.columns:
+        #     if "_W2" in i:
+        #         self.skills_list.append(i[0:-3])
+        self.skills_list = [i[0: -3] for i in self.academy_df.columns if "_W2" in i]
+        print(self.skills_list)
+        f = LoadData('behaviours', self.skills_list)
 
 class Transform_json():
     def __init__(self, talent_df):
@@ -216,7 +222,6 @@ class Transform_applicant_csv():
     def replace_nan(self):
         self.applicant_df.fillna('Unknown', inplace=True)
 
-
     def drop_id_column(self):
         self.applicant_df.drop('id', axis=1, inplace=True)
 
@@ -229,14 +234,12 @@ class Transform_sparta_day_txt():
         self.format_date()
         #print(self.sparta_day_df)
 
-
     def format_date(self):
         dates = []
         for index,row in self.sparta_day_df.iterrows():
 
             dates.append(parse(row.date).date())
         self.sparta_day_df['date'] = dates
-
 
     def format_score(self):
         ps_score = []
@@ -257,9 +260,6 @@ def format_string_tables(df, column_name):
     unique = list(set(df[column_name]))
     f = LoadData(column_name, unique)
 
-#def take_column_name(df, column_name):
-
-
 
 if __name__ == '__main__':
     # test = Transform_json()
@@ -278,7 +278,9 @@ if __name__ == '__main__':
     # t.replace_nan()
     # print(t.applicant_df.to_string())
 
-    t = Transform_sparta_day_txt('hello')
-    t.format_date()
-    t.format_score()
-    print(t.sparta_day_df.to_string())
+    # t = Transform_sparta_day_txt(sparta_day)
+    # t.format_date()
+    # t.format_score()
+    # print(t.sparta_day_df.to_string())
+
+    test = Transform_academy_csv(academy_df)
