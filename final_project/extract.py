@@ -175,4 +175,8 @@ class Extract:
 
 if __name__ == '__main__':
     instance = Extract('all')
+    instance.all_data_extractor()
+    # print(instance.applicant_df.to_string())
+    print(instance.talent_df.to_string())
+    # print(instance.sparta_day_df.to_string())
 

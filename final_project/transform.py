@@ -21,7 +21,6 @@ class Transform_academy_csv():
         self.null_rename()
         self.deactive_nulls()
         logging.info("test logging")
-        self.format_string_tables(academy_df, 'invited_by')
         #self.format_string_tables(self.academy_df, '')
 
 
@@ -161,9 +160,9 @@ class Transform_applicant_csv():
         self.fix_applicants_invite_format()
         self.format_phones()
         self.fix_dob_format()
+        format_string_tables(applicant_df, 'academy')
         format_string_tables(applicant_df, 'gender')
         format_string_tables(applicant_df, 'city')
-        format_string_tables(applicant_df, 'academy')
         format_string_tables(applicant_df, 'degree')
         format_string_tables(applicant_df, 'uni')
 
