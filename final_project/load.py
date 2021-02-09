@@ -143,7 +143,7 @@ class LoadData:
 
     def import_city(self):
         for city in self.cities_list:
-            check = self.conn.execute('SELECT city FROM WHERE city = ?', city)
+            check = self.conn.execute('SELECT city_name FROM City WHERE city_name = ?', city)
             try:
                 city = check.fetchone()[0]
                 pass
@@ -155,13 +155,13 @@ class LoadData:
 
     def import_university_details(self):
         for university in self.university_list:
-            check = self.conn.execute('SELECT university_name FROM University_Details WHERE = ?', university)
+            check = self.conn.execute('SELECT university_name FROM University_Details WHERE university_name = ?', university)
             try:
                 university = check.fetchone()[0]
                 pass
             except TypeError:
                 logging.info(f'The {university} has now been imported')
-                self.conn.execute('INSERT INTO University_Details (university) VALUES (?)', university)
+                self.conn.execute('INSERT INTO University_Details (university_name) VALUES (?)', university)
                 self.conn.commit()
 
 
@@ -178,7 +178,7 @@ class LoadData:
 
     def import_staff_one(self):
         for staff_1 in self.staff_list_1:
-            check = self.conn.execute('SELECT Staff FROM staff_name WHERE staff_name = ?', staff_1)
+            check = self.conn.execute('SELECT staff_name FROM Staff WHERE staff_name = ?', staff_1)
             try:
                 staff_1 = check.fetchone()[0]
                 pass
@@ -189,7 +189,7 @@ class LoadData:
 
     def import_staff_two(self):
         for staff_2 in self.staff_list_2:
-            check = self.conn.execute('SELECT Staff FROM staff_name WHERE staff_name = ?', staff_2)
+            check = self.conn.execute('SELECT staff_name FROM Staff WHERE staff_name = ?', staff_2)
             try:
                 staff_2 = check.fetchone()[0]
                 pass

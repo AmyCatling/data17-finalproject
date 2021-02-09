@@ -11,10 +11,6 @@ logging.info("========  Initialised log file  ========")
 def almighty_method():
     extractor = Extract('all')
     extractor.all_data_extractor()
-    print(extractor.academy_df)
-    print(extractor.applicant_df)
-    print(extractor.sparta_day_df)
-    print(extractor.talent_df)
     transformer1 = Transform_academy_csv(extractor.academy_df)
     transformer2 = Transform_json(extractor.talent_df)
     transformer3 = Transform_applicant_csv(extractor.applicant_df)
@@ -50,17 +46,17 @@ def sparta_day_load():
     transformer4 = Transform_sparta_day_txt(extractor4.sparta_day_df)
     loader = LoadData(load_choice='sparta_day', df=transformer4.sparta_day_df)
 
+almighty_method()
 # try:
-#     almighty_method()
 # except:
-#     print("LOL")
-try:
-    academy_load()
-    json_load()
-    # applicant_load()
-    # sparta_day_load()
-except:
-    logging.error("Code is broke lol")
-    raise
+#     print("dosent work")
+# try:
+#     academy_load()
+#     json_load()
+#     # applicant_load()
+#     # sparta_day_load()
+# except:
+#     logging.error("Code is broke lol")
+#     raise
 
 
