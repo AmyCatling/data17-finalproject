@@ -14,6 +14,7 @@ def almighty_method():
     transformer1 = Transform_academy_csv(extractor.academy_df)
     transformer2 = Transform_json(extractor.talent_df)
     transformer3 = Transform_applicant_csv(extractor.applicant_df)
+    print(transformer3.applicant_df.to_string())
     transformer4 = Transform_sparta_day_txt(extractor.sparta_day_df)
     loader1 = LoadData(load_choice='academy_df', df=transformer1.academy_df)
     loader2 = LoadData(load_choice='talent_df', df=transformer2.talent_df)

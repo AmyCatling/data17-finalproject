@@ -51,10 +51,10 @@ CREATE TABLE Staff (
     staff_name VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE Streams (
-    stream_id INT NOT NULL IDENTITY PRIMARY KEY,
-    stream_name VARCHAR(20)
-);
+--CREATE TABLE Streams (
+--    stream_id INT NOT NULL IDENTITY PRIMARY KEY,
+--    stream_name VARCHAR(20)
+--);
 
 CREATE TABLE Applicants (
     applicant_id INT NOT NULL IDENTITY PRIMARY KEY,
@@ -82,7 +82,7 @@ CREATE TABLE Weekly_Results (
 CREATE TABLE Courses (
     course_id INT NOT NULL IDENTITY PRIMARY KEY,
     course_name VARCHAR(20),
-    stream_id INT FOREIGN KEY REFERENCES Streams(stream_id),
+--    stream_id INT FOREIGN KEY REFERENCES Streams(stream_id),
     staff_id INT FOREIGN KEY REFERENCES Staff(staff_id)
 );
 

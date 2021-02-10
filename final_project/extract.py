@@ -109,7 +109,6 @@ class Extract:
 
 
     def applicant_csv_to_df(self):
-        count = 0
         for file in self.applicant_csv_file_names_list:
             key = file
             s3_object = s3_client.get_object(Bucket=bucket_name, Key=key)
@@ -117,9 +116,6 @@ class Extract:
             df = pd.read_csv(file)
             df.insert(0, 'original_file_name', '')
             df['original_file_name'] = key
-            count += 1
-            # if count > 3:
-            #     break
             self.applicant_csv_df_list.append(df)
         self.applicant_df = pd.concat(self.applicant_csv_df_list)
         logging.info("Applicant_csv files have been successfully concatenated and are stored in the variable applicant_df")
