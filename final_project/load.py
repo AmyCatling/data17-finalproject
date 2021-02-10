@@ -68,6 +68,12 @@ class LoadData:
         elif load_choice == 'academy_df':
             self.academy_df = df
             self.import_student()
+        elif load_choice == 'talent_df':
+            self.talent_df = df
+            self.import_sparta_day_interview()
+        elif load_choice == 'sparta_day_df':
+            self.sparta_day_df = df
+            self.import_sparta_day_assessment()
         # elif load_choice == 'sparta_day_interview':
         #     self.sparta_day_interview_list = df
         #     self.import_sparta_day_interview()
@@ -220,7 +226,7 @@ class LoadData:
                 self.conn.execute('INSERT INTO Streams (stream_name) VALUES (?)', stream)
                 self.conn.commit()
 
-    # Importing the information about each applicant to Sparta into the Applicants table in the SQLDatabase
+    # Importing the information about each applicant to Sparta into the Applicants table in the SQL Database
     def import_applicants(self):
         for index, row in self.applicant_df.iterrows():
             get_gender = self.conn.execute("SELECT gender_id FROM Gender WHERE gender = ?", row.gender)
@@ -265,31 +271,28 @@ class LoadData:
             #             self.conn.execute('INSERT INTO Streams (stream_name) VALUES (?)', stream)
             #             self.conn.commit()
 
+    def import_courses(self):
+        pass
 
     def import_student(self):
-        count = 0
         for index, row in self.academy_df.iterrows():
             get_applicant = self.conn.execute("SELECT applicant_id FROM Applicants WHERE name = ?", row["name"])
-            print(row["name"])
-            count += 1
-            print(count)
             applicant_id = get_applicant.fetchone()[0]
 
             get_stream = self.conn.execute("SELECT stream_id FROM Streams WHERE stream_name = ?", row.course_name)
             stream_id = get_stream.fetchone()[0]
             self.conn.execute("INSERT INTO Student (graduated, applicant_id, stream_id) VALUES (?,?,?)", row.Active, applicant_id, stream_id)
         self.conn.commit()
-    #
-    # def import_sparta_day_interview(self):
-    #     get_applicant = self.conn.execute("SELECT applicant_id FROM Applicants WHERE applicant_id=?", XXX)
-    #     get_stream = self.conn.execute("SELECT course_id FROM Courses WHERE course_id = ?, XXX)
-    #     applicant_id = get_applicant.fetchone()[0]
-    #     course_id = get_course.fetchone()[0]
-    #     self.conn.execute("INSERT INTO Sparta_Day_Interview( self_development, geo_flexible, financial_support_self, result, course_id, applicant_id)
-    #       VALUES(?,?,?,?,?,?)", XXX)
 
-    #
-    #
+
+    def import_sparta_day_interview(self):
+        for index, row in self.talent_df.iterrows():
+            get_applicant = self.conn.execute("SELECT applicant_id FROM Applicants WHERE name = ?", row["name"])
+            applicant_id = get_applicant.fetchone()[0]
+            self.conn.execute("""INSERT INTO Sparta_Day_Interview(self_development, geo_flexible, financial_support_self, result, course_id, applicant_id)
+                              VALUES(?,?,?,?,?,?)
+            """, row.self_development, row.geo_flex, row.financial_support_self, row.result, course_id, applicant_id)
+
     # def import_sparta_day_assessment(self):
     #     get_acadamey = self.conn.execute("SELECT academy_id FROM Academies WHERE academy_id = ?", XXX)
     #     acadamey_id = get_academy.fetchone()[0]
@@ -298,7 +301,8 @@ class LoadData:
     #
     #     self.conn.execute("INSERT INTO Sparta_Day_Assessment(
 
-    # def import_strength_junction_table(sel
+    # def import_strength_junction_table(self):
+
     #       get_strength = self.conn.execute("SELECT strenght_id FROM Strenghts WHERE strength_name = row.strenghts)
     #     #     strength_id = get_strength.fetchone()[0]
     #     #     get_applicant = self.conn.execute("SELECT applicant_id FROM Applicants WHERE applicant_name = row.name)
