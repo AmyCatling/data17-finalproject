@@ -1,4 +1,4 @@
-# Check final dates
+# Import modules
 import json
 import pandas as pd
 import numpy as np
@@ -8,33 +8,28 @@ from final_project.load import LoadData
 import logging
 
 
-class Transform_academy_csv():
+# Class for transforming the Academy CSV dataframe
+# Also initialise cleaning and column name list for behaviours
+class Transform_academy_csv:
     def __init__(self, academy_df):
-        # This is a temporary filepath, will inheret filepath
-        # self.academy_df = pd.read_csv("C:/Users/joest/Downloads/Data_29_2019-03-04.csv")
         self.academy_df = academy_df
-        # super().init()
-
         self.add_columns()
         self.active_nulls()
         self.floats_to_ints()
         self.null_rename()
         self.deactive_nulls()
         logging.info("test logging")
-        self.format_string_tables(academy_df, 'invited_by')
-        #self.format_string_tables(self.academy_df, '')
 
-
+    # Create a new column for the Spartan's status, initially populated with Y values
     def add_columns(self):
-        # Create a new column for the Spartan's status, initially populated with Y values
-
         row_list = []
         for i in range(len(self.academy_df.index.values)):
             row_list.append("Y")
         self.academy_df.insert(4, "Active", row_list, True)
+        logging.info("Successfully added active column")
 
+    # Null values are replaced with 99, an obviously false value
     def active_nulls(self):
-        # Null values are replaced with 99, an obviously false value
         for column in self.academy_df:
             if "_W" in column:
                 if "_W9" not in column and "_W10" not in column:
@@ -42,6 +37,7 @@ class Transform_academy_csv():
                 else:
                     self.academy_df[column].fillna(0, inplace=True)
 
+    # If column equal to 99, removed from course, else trainee graduated
     def null_rename(self):
         active_list = []
         for index, row in self.academy_df.iterrows():
@@ -51,20 +47,34 @@ class Transform_academy_csv():
                 active_list.append('Y')
         self.academy_df['Active'] = active_list
 
+    # The characteristic columns all contain a "_W" so they can be found that way
     def floats_to_ints(self):
-        # The characteristic columns all contain a "_W" so they can be found that way
         for column in self.academy_df:
             if "_W" in column:
                 self.academy_df[column] = self.academy_df[column].astype(int)
 
+    # Change all 99 and 0 to null then change all nulls to 0
     def deactive_nulls(self):
-
         self.academy_df = self.academy_df.replace(99, np.nan)
         self.academy_df = self.academy_df.replace(0, np.nan)
         self.academy_df.fillna(0, inplace=True)
 
+    # Taking the Sparta Behaviours from the academy_df and producing a list of the unique behaviours
+    # Then send it to LoadData
+    def take_column_name(self):
+        # print(self.academy_df.columns)
+        # self.skills_list = []
+        # for i in self.academy_df.columns:
+        #     if "_W2" in i:
+        #         self.skills_list.append(i[0:-3])
+        self.skills_list = [i[0: -3] for i in self.academy_df.columns if "_W2" in i]
+        # print(self.skills_list)
+        f = LoadData('behaviours', self.skills_list)
 
-class Transform_json():
+
+# Class for transforming the Talent Day json dataframe
+# Also initialise cleaning and produce list from dictionaries of tech, strengths and weaknesses
+class Transform_json:
     def __init__(self, talent_df):
         # f = open("C:/Users/joest/Downloads/10383.json")
         # j = json.load(f)
@@ -77,9 +87,8 @@ class Transform_json():
         self.format_stren_weak()
         self.encode_columns()
 
-
+    # Changing the Yes/No or Pass/Fail into BIT (0 or 1) ready for importing into the database
     def json_active_bits(self):
-
         relevant_columns = ['self_development', 'geo_flex', 'financial_support_self', 'result']
 
         for column in relevant_columns:
@@ -91,9 +100,11 @@ class Transform_json():
                     column_list.append(0)
             self.talent_df[column] = column_list
 
+    # Fill null values with the string 'None'
     def fix_nulls(self):
         self.talent_df['tech_self_score'].fillna('None', inplace=True)
 
+    # Changing the data type of the date to datetime
     def date_types_changed(self):
         new_dates = []
         for i in self.talent_df['date']:
@@ -102,8 +113,8 @@ class Transform_json():
             new_dates.append(datetime.datetime.strptime(i, '%d/%m/%Y').date())
         self.talent_df['date'] = new_dates
 
+    # Changes the encoding to enable the columns to be read in the database
     def encode_columns(self):
-
         tech = []
         strengths = []
         weaknesses = []
@@ -117,6 +128,7 @@ class Transform_json():
         self.talent_df['strengths'] = strengths
         self.talent_df['weaknesses'] = weaknesses
 
+    # Produce a list of the unique technologies, then send the list to load
     def format_known_tech(self):
         technologies = []
         for index, row in self.talent_df.iterrows():
@@ -129,6 +141,7 @@ class Transform_json():
                         technologies.append(tech)
         f = LoadData('tech', technologies)
 
+    # Produce a list of the unique strengths and weaknesses, then send the lists to load
     def format_stren_weak(self):
         stren = []
         weak = []
@@ -151,26 +164,25 @@ class Transform_json():
         g = LoadData('weakness', weak)
 
 
-class Transform_applicant_csv():
-
+# Class for transforming the Applicants CSV dataframe
+# Also initialise cleaning and produce a list for unique entries in specified columns
+class Transform_applicant_csv:
     def __init__(self, applicant_df):
-        #self.applicant_df = pd.read_csv("C:/Users/joest/Downloads/April2019Applicants.csv")
+        # self.applicant_df = pd.read_csv("C:/Users/joest/Downloads/April2019Applicants.csv")
         self.applicant_df = applicant_df
         self.drop_id_column()
         self.replace_nan()
         self.fix_applicants_invite_format()
         self.format_phones()
         self.fix_dob_format()
+        format_string_tables(applicant_df, 'academy')
         format_string_tables(applicant_df, 'gender')
         format_string_tables(applicant_df, 'city')
-        format_string_tables(applicant_df, 'academy')
         format_string_tables(applicant_df, 'degree')
         format_string_tables(applicant_df, 'uni')
-
-
         #print(self.applicant_df.to_string())
 
-
+    # Changing the data type of the date to datetime
     def fix_dob_format(self):
         new_dates = []
         for i in self.applicant_df['dob']:
@@ -183,6 +195,7 @@ class Transform_applicant_csv():
 
         self.applicant_df['dob'] = new_dates
 
+    # Format the phone numbers so they are consistent
     def format_phones(self):
         numbers = []
         for number in self.applicant_df['phone_number']:
@@ -196,6 +209,7 @@ class Transform_applicant_csv():
                 numbers.append(None)
         self.applicant_df['phone_number'] = numbers
 
+    # Transform the invited_date and month into a single column for date
     def fix_applicants_invite_format(self):
         formatted_dates = []
         for index, row in self.applicant_df.iterrows():
@@ -213,31 +227,33 @@ class Transform_applicant_csv():
         self.applicant_df['invited_date'] = formatted_dates
         self.applicant_df.drop('month', axis=1, inplace=True)
 
+    # Replace any null values in the dataframe for the string 'Unknown'
     def replace_nan(self):
         self.applicant_df.fillna('Unknown', inplace=True)
 
-
+    # Drop the id column as it wouldn't be unique in the database
     def drop_id_column(self):
         self.applicant_df.drop('id', axis=1, inplace=True)
 
 
-class Transform_sparta_day_txt():
-
+# Class for transforming the Sparta_Day txt dataframe
+# Also initialise cleaning
+class Transform_sparta_day_txt:
     def __init__(self, sparta_day_df):
         self.sparta_day_df = sparta_day_df
         self.format_score()
         self.format_date()
+        # self.percentages()
         #print(self.sparta_day_df)
 
-
+    # Taking the date from the top of the txt file and put it into a list to put it into a column in the dataframe
     def format_date(self):
         dates = []
-        for index,row in self.sparta_day_df.iterrows():
-
+        for index, row in self.sparta_day_df.iterrows():
             dates.append(parse(row.date).date())
         self.sparta_day_df['date'] = dates
 
-
+    # Formatting the psychometric and presentation scores into their own separate columns
     def format_score(self):
         ps_score = []
         pr_score = []
@@ -247,21 +263,21 @@ class Transform_sparta_day_txt():
                 ps_score.append(54)
                 pr_score.append(int(row.presentation.split(': ')[1].split('/')[0]))
             else:
-                ps_score.append(int(row.psychometrics.split(': ')[1].split('/')[0]))
-                pr_score.append(int(row.presentation.split(': ')[1].split('/')[0]))
+                ps_score.append(((int(row.psychometrics.split(': ')[1].split('/')[0]))/int(row.psychometrics.split(': ')[1].split('/')[1]))*100)
+                pr_score.append(((int(row.presentation.split(': ')[1].split('/')[0]))/int(row.presentation.split(': ')[1].split('/')[1]))*100)
         self.sparta_day_df['psychometrics'] = ps_score
         self.sparta_day_df['presentation'] = pr_score
 
 
+# Used for the one column tables, takes a column of a DF, turns into set to remove duplicates
+# then assigns it to a list so it can be iterated through in load
 def format_string_tables(df, column_name):
     unique = list(set(df[column_name]))
     f = LoadData(column_name, unique)
 
-#def take_column_name(df, column_name):
-
-
 
 if __name__ == '__main__':
+    pass
     # test = Transform_json()
     # test.talent_df['self_development'] = 'No'
     # print(test.talent_df.to_string())
@@ -277,8 +293,22 @@ if __name__ == '__main__':
     # t.fix_dob_format()
     # t.replace_nan()
     # print(t.applicant_df.to_string())
+    # from final_project.extract import Extract
+    # extractor_academy_csv = Extract('academy_csv')
+    # extractor_academy_csv.all_data_extractor()
+    # t = Transform_sparta_day_txt(extractor_academy_csv.academy_df)
+    # print(extractor_academy_csv.skills_list)
 
-    t = Transform_sparta_day_txt('hello')
-    t.format_date()
-    t.format_score()
-    print(t.sparta_day_df.to_string())
+    # extractor = Extract('txt')
+    # extractor.all_data_extractor()
+    # t = Transform_sparta_day_txt(extractor.sparta_day_df)
+    # print(t.sparta_day_df['presentation'].max())
+    # print(t.sparta_day_df['psychometrics'].max())
+    # print(t.sparta_day_df['psychometrics'])
+    # print(t.sparta_day_df['presentation'])
+
+    # t.format_date()
+    # t.format_score()
+    # print(t.sparta_day_df.to_string())
+
+    # test = Transform_academy_csv()
