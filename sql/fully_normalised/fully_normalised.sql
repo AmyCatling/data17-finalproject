@@ -13,7 +13,7 @@ CREATE TABLE Academies (
 
 CREATE TABLE Technologies (
     technology_id INT NOT NULL IDENTITY PRIMARY KEY,
-    skill_name VARCHAR
+    skill_name VARCHAR(20)
 );
 
 CREATE TABLE Strengths (
@@ -43,7 +43,7 @@ CREATE TABLE University_Details (
 
 CREATE TABLE Degree_Grade (
     degree_grade_id INT NOT NULL IDENTITY PRIMARY KEY,
-    classification VARCHAR(4)
+    classification VARCHAR(20)
 );
 
 CREATE TABLE Staff (
@@ -64,7 +64,7 @@ CREATE TABLE Applicants (
     email VARCHAR(320),
     city_id INT FOREIGN KEY REFERENCES City(city_id),
     address VARCHAR(MAX),
-    postcode VARCHAR(4),
+    postcode_area VARCHAR(4),
     phone_number CHAR(13),
     university_id INT FOREIGN KEY REFERENCES University_Details(university_id),
     degree_grade_id INT FOREIGN KEY REFERENCES Degree_Grade(degree_grade_id),
@@ -88,6 +88,7 @@ CREATE TABLE Courses (
 
 CREATE TABLE Student (
     student_id INT NOT NULL IDENTITY PRIMARY KEY,
+    graduated CHAR(1),
     applicant_id INT FOREIGN KEY REFERENCES Applicants(applicant_id),
     course_id INT FOREIGN KEY REFERENCES Courses(course_id)
 );
