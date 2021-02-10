@@ -64,7 +64,7 @@ CREATE TABLE Applicants (
     email VARCHAR(320),
     city_id INT FOREIGN KEY REFERENCES City(city_id),
     address VARCHAR(MAX),
-    postcode VARCHAR(4),
+    postcode_area VARCHAR(4),
     phone_number CHAR(13),
     university_id INT FOREIGN KEY REFERENCES University_Details(university_id),
     degree_grade_id INT FOREIGN KEY REFERENCES Degree_Grade(degree_grade_id),
@@ -87,9 +87,9 @@ CREATE TABLE Courses (
 );
 
 CREATE TABLE Student (
-    student_id INT NOT NULL IDENTITY PRIMARY KEY,
     applicant_id INT FOREIGN KEY REFERENCES Applicants(applicant_id),
-    course_id INT FOREIGN KEY REFERENCES Courses(course_id)
+    course_id INT FOREIGN KEY REFERENCES Courses(course_id),
+    graduated CHAR(1)
 );
 
 CREATE TABLE Sparta_Day_Interview (
