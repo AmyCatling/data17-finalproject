@@ -22,6 +22,7 @@ class Transform_academy_csv:
         self.behaviour_take_column_name()
         format_string_tables(academy_df, "trainer")
         format_string_tables(academy_df, "course_name")
+        self.week_number()
 
 
 
@@ -74,8 +75,14 @@ class Transform_academy_csv:
         #         self.skills_list.append(i[0:-3])
         self.skills_list = [i[0: -3] for i in self.academy_df.columns if "_W2" in i]
         # print(self.skills_list)
+
         f = LoadData('behaviours', self.skills_list)
-        #
+
+    def week_number(self):
+        get_week_number_list = [i[-1] for i in self.academy_df.columns if "W" in i]
+        self.week_number_list = list(set(get.week_number_list)))
+        #self.week_number_list = [0,1,2,3,4,5,6,7,8,9,10]
+        #f = LoadData('week_number', self.week_number_list)
 
 
 # Class for transforming the Talent Day json dataframe
@@ -137,6 +144,7 @@ class Transform_json:
     # Produce a list of the unique technologies, then send the list to load
     def format_known_tech(self):
         technologies = []
+        scores = []
         for index, row in self.talent_df.iterrows():
             # print(type(row.tech_self_score))
             if type(row.tech_self_score) != dict:
@@ -145,7 +153,14 @@ class Transform_json:
                 for tech in row.tech_self_score.keys():
                     if tech not in technologies:
                         technologies.append(tech)
-        f = LoadData('tech', technologies)
+
+                for score in row.tech_self_score.values():
+                    if score not in scores:
+                        scores.append(score)
+
+        f = LoadData('technologies', technologies)
+        f = LoadData('scores', scores)
+
 
     # Produce a list of the unique strengths and weaknesses, then send the lists to load
     def format_stren_weak(self):
@@ -183,7 +198,7 @@ class Transform_applicant_csv:
         self.fix_dob_format()
         format_string_tables(applicant_df, 'gender')
         format_string_tables(applicant_df, 'city')
-        format_string_tables(applicant_df, 'uni_details')
+        format_string_tables(applicant_df, 'uni')
         format_string_tables(applicant_df, 'degree')
         format_string_tables(applicant_df, "invited_by")
 

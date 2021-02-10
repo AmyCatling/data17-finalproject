@@ -1,23 +1,23 @@
 Weekly_Results;
-Behaviours;
+DONE Behaviours;
 Student;
-Applicants;
-Gender;
-City;
-University_Details;
-Degree_Grade;
-Staff;
-Streams;
+DONE Applicants;
+DONE Gender;
+DONE City;
+DONE University_Details;
+DONE Degree_Grade;
+DONE Staff;
+DONE Streams;
 Courses;
 Sparta_Day_Interview;
 Sparta_Day_Assessment;
-Academies;
+DONE Academies;
 DONE - Strengths;
 DONE - Weaknesses;
 Strength_junction_table
 Weakness_junction_table;
 Talent_Technologies_junction;
-Technologies;
+DONE Technologies;
 
 
 

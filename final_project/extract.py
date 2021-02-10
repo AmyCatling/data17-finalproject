@@ -71,9 +71,7 @@ class Extract:
         self.academy_csv_file_names_list = [file for file in self.academy_csv_file_names_list if
                                             file not in ["Academy/testEngineering_17_2019-02-18.csv", "file_names.csv"]]
         print(f"A total of {len(self.academy_csv_file_names_list)} Academy csv files were found in Amazon S3")
-        pprint(self.academy_csv_file_names_list)
-        print("Items left in bucket: ")
-        print(self.items_in_bucket)
+
 
     def retrieve_applicant_csv_file_names(self):
         self.applicant_csv_file_names_list = fnmatch.filter(self.items_in_bucket, '*Applicants.csv')
@@ -83,8 +81,6 @@ class Extract:
         self.json_file_names_list = fnmatch.filter(self.items_in_bucket, '*.json')
         logging.info(f"A total of {len(self.json_file_names_list)} json files were found in Amazon S3")
         print(f"A total of {len(self.json_file_names_list)} json files were found in Amazon S3")
-        pprint(self.json_file_names_list)
-        print(self.items_in_bucket)
 
     def retrieve_txt_file_names(self):
         self.txt_file_names_list = fnmatch.filter(self.items_in_bucket, '*.txt')
@@ -113,6 +109,7 @@ class Extract:
 
 
     def applicant_csv_to_df(self):
+        count = 0
         for file in self.applicant_csv_file_names_list:
             key = file
             s3_object = s3_client.get_object(Bucket=bucket_name, Key=key)
@@ -120,6 +117,9 @@ class Extract:
             df = pd.read_csv(file)
             df.insert(0, 'original_file_name', '')
             df['original_file_name'] = key
+            count += 1
+            # if count > 3:
+            #     break
             self.applicant_csv_df_list.append(df)
         self.applicant_df = pd.concat(self.applicant_csv_df_list)
         logging.info("Applicant_csv files have been successfully concatenated and are stored in the variable applicant_df")
@@ -180,11 +180,11 @@ class Extract:
 
 #
 #
-#
-# if __name__ == '__main__':
-#     instance = Extract('all')
-#     instance.all_data_extractor()
-#     print(instance.academy_csv_file_names_list)
-#     print(instance.applicant_df.to_string())
-#     print(instance.talent_df.to_string())
-#     print(instance.sparta_day_df.to_string())
+
+if __name__ == '__main__':
+    instance = Extract('all')
+    instance.all_data_extractor()
+    # print(instance.academy_csv_file_names_list)
+    print(instance.applicant_df.to_string())
+    # print(instance.talent_df.to_string())
+    # print(instance.sparta_day_df.to_string())
