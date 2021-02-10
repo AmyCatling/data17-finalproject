@@ -13,7 +13,7 @@ CREATE TABLE Academies (
 
 CREATE TABLE Technologies (
     technology_id INT NOT NULL IDENTITY PRIMARY KEY,
-    skill_name VARCHAR
+    skill_name VARCHAR(20)
 );
 
 CREATE TABLE Strengths (
@@ -43,7 +43,7 @@ CREATE TABLE University_Details (
 
 CREATE TABLE Degree_Grade (
     degree_grade_id INT NOT NULL IDENTITY PRIMARY KEY,
-    classification VARCHAR(4)
+    classification VARCHAR(10)
 );
 
 CREATE TABLE Staff (
@@ -51,21 +51,16 @@ CREATE TABLE Staff (
     staff_name VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE Streams (
-    stream_id INT NOT NULL IDENTITY PRIMARY KEY,
-    stream_name VARCHAR(20)
-);
-
 CREATE TABLE Applicants (
     applicant_id INT NOT NULL IDENTITY PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
+    name VARCHAR(200) NOT NULL,
     gender_id INT FOREIGN KEY REFERENCES Gender(gender_id),
     dob DATE,
     email VARCHAR(320),
     city_id INT FOREIGN KEY REFERENCES City(city_id),
     address VARCHAR(MAX),
-    postcode_area VARCHAR(4),
-    phone_number CHAR(13),
+    postcode_area VARCHAR(10),
+    phone_number VARCHAR(30),
     university_id INT FOREIGN KEY REFERENCES University_Details(university_id),
     degree_grade_id INT FOREIGN KEY REFERENCES Degree_Grade(degree_grade_id),
     staff_id INT FOREIGN KEY REFERENCES Staff(staff_id)
@@ -82,7 +77,6 @@ CREATE TABLE Weekly_Results (
 CREATE TABLE Courses (
     course_id INT NOT NULL IDENTITY PRIMARY KEY,
     course_name VARCHAR(20),
-    stream_id INT FOREIGN KEY REFERENCES Streams(stream_id),
     staff_id INT FOREIGN KEY REFERENCES Staff(staff_id)
 );
 
@@ -138,7 +132,6 @@ TRUNCATE TABLE Student;
 TRUNCATE TABLE Courses;
 TRUNCATE TABLE Weekly_Results;
 TRUNCATE TABLE Applicants;
-TRUNCATE TABLE Streams; 
 TRUNCATE TABLE Staff;
 TRUNCATE TABLE Degree_Grade;
 TRUNCATE TABLE University_Details;
@@ -158,8 +151,7 @@ SELECT * FROM Gender;
 SELECT * FROM City;
 SELECT * FROM University_Details;
 SELECT * FROM Degree_Grade;
-SELECT * FROM Staff;
-SELECT * FROM Streams; 
+SELECT * FROM Staff; 
 SELECT * FROM Courses;
 SELECT * FROM Sparta_Day_Interview; 
 SELECT * FROM Sparta_Day_Assessment; 
