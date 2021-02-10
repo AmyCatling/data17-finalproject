@@ -2,8 +2,8 @@ import pytest
 import pandas as pd
 from final_project.extract import *
 
-extract = Extract('all')
-extract.all_data_loader()
+extract = Extract()
+
 
 def test_df():
     assert isinstance(extract.academy_df, pd.DataFrame)
