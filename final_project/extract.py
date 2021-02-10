@@ -96,7 +96,6 @@ class Extract:
             Key='file_names.csv'
         )
 
-
     #4 functions to get files from S3, add columns and convert to dataframes
     def academy_csv_to_df(self):
         logging.info("Extracting academy csv files")
@@ -106,6 +105,8 @@ class Extract:
             s3_object = s3_client.get_object(Bucket=bucket_name, Key=file)
             file_obj = s3_object['Body']
             df = pd.read_csv(file_obj)
+
+
 
             df.insert(0, 'original_file_name', file)
             df.insert(1, 'course_name', (file.split('/')[1]).rsplit('_', 1)[0])
@@ -179,11 +180,9 @@ class Extract:
             df['academy'] = academy.split()[0]
 
             df = df[['original_file_name', 'academy', 'date', 'name', 'psychometrics', 'presentation']]
-
+            
             self.sparta_day_df = pd.concat([df, self.sparta_day_df])
         logging.info("Text files have been successfully concatenated and are stored in the variable sparta_day_df")
-
-
 
 if __name__ == '__main__':
     instance = Extract()
@@ -191,4 +190,3 @@ if __name__ == '__main__':
     print(instance.applicant_df)
     print(instance.talent_df)
     print(instance.sparta_day_df)
-
