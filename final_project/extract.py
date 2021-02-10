@@ -58,7 +58,7 @@ class Extract:
             #The list is used to build a dataframe, containing a single column: file_name
             self.file_names_df = pd.DataFrame(self.file_names_list).rename(columns={0: 'file_name'})
             #The upload function turns it into a csv and pushes to S3
-            self.upload_file_names_df()
+            ###self.upload_file_names_df() ###Un-comment this to create file_names file
             logging.info("Uploaded file: file_names.csv")
             #'file_names.csv' is popped from the list so that it does not unintentionally interfere with csv methods
             self.file_names_list.remove('file_names.csv')
@@ -80,7 +80,7 @@ class Extract:
             #The new_files_df is concatenated onto the file_names_df and reassigned
             self.file_names_df = pd.concat([self.file_names_df, self.new_files_df])
             #This new df of all currently used file names is then reuploaded to S3, overwriting the old version
-            self.upload_file_names_df()
+            ###self.upload_file_names_df() ###Un-comment this to create file_names file
             logging.info("updated file: file_names.csv")
             #As before, 'file_names.csv' is popped to not interfere with csv methods
             self.file_names_list.remove('file_names.csv')

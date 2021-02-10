@@ -13,21 +13,8 @@ def test_df():
 
 
 def test_file_names_in_correct_list():
-    assert len(extract.academy_csv_file_names_list) > 0
-    for file in extract.academy_csv_file_names_list:
-        assert 'csv' in file
-
-    assert len(extract.json_file_names_list) > 0
-    for file in extract.json_file_names_list:
-        assert 'json' in file
-
-    assert len(extract.applicant_csv_file_names_list) > 0
-    for file in extract.applicant_csv_file_names_list:
-        assert 'Applicants.csv' in file
-
-    assert len(extract.txt_file_names_list) > 0
-    for file in extract.txt_file_names_list:
-        assert 'txt' in file
+    assert bool(extract.items_in_bucket) == True
+    assert bool(extract.file_names_list) == True
 
 
 def test_columns_are_added():
