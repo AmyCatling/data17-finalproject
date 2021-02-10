@@ -44,11 +44,90 @@ class Extract:
             except KeyError:
                 break
 
+
     def data_checker(self):
-        for file in self.keys_in_bucket:
-            if file not in files_list:
-                self.items_in_bucket.append(file)
-                files_list.append(file)
+        self.all_data_extractor()
+        #First checks if file_names.csv already exists. If not, it will be created
+        if 'file_names.csv' in self.items_in_bucket:
+            s3_object = s3_client.get_object(Bucket=bucket_name, Key='file_names.csv')
+            self.file_names_df = pd.read_csv(s3_object['Body'])
+            print(self.file_names_df['file_name'].values.tolist())
+            print(self.academy_df.to_string())
+
+            file_name_lists = [self.applicant_csv_file_names_list, self.json_file_names_list, self.academy_csv_file_names_list, self.txt_file_names_list]
+            new_file_names = []
+
+            for list in file_name_lists:
+                for name in list:
+                    if name not in self.file_names_df["file_name"].values.tolist():
+                        new_file_names.append(name)
+
+                    else:
+                        self.academy_df = self.academy_df[self.academy_df.original_file_name != name]
+                        self.talent_df = self.talent_df[self.talent_df.original_file_name != name]
+                        self.sparta_day_df = self.sparta_day_df[self.sparta_day_df.original_file_name != name]
+                        self.applicant_df = self.applicant_df[self.applicant_df.original_file_name != name]
+
+                        # df_name_list = [self.academy_df, self.talent_df, self.sparta_day_df, self.applicant_df]
+                        # for df in df_name_list:
+                        #     index_names = df[df["original_file_name"] != name].index
+                        #     df.drop(index_names, inplace=True)
+                        #     #df.drop(df[df["original_file_name"] == name].index, inplace=True)
+            print(new_file_names)
+            df = pd.DataFrame(new_file_names).rename(columns={0: 'file_name'})
+            self.file_names_df = pd.concat([df, self.file_names_df])
+
+            # for new_name in new_file_names:
+            #     new_name_df = pd.DataFrame(new_name, columns=["file_name"])
+            #     self.file_names_df["file_name"].append(new_name_df)
+            self.upload_file_names_df()
+
+        # if 'file_names.csv' in self.items_in_bucket:
+        #     s3_object = s3_client.get_object(Bucket=bucket_name, Key='file_names.csv')
+        #     self.file_names_df = pd.read_csv(s3_object['Body'])
+        #     df_name_list = [self.academy_df, self.talent_df, self.sparta_day_df, self.applicant_df]
+        #     new_file_names = []
+        #
+        #     for df_name in df_name_list:
+        #         for value in df_name["original_file_name"].values:
+        #             if value not in self.file_names_df["file_name"].values:
+        #                 new_file_names.append(value)
+        #             else:
+        #                 index_names = df_name[df_name["file_name"] == value].index
+        #                 df_name.drop(index_names, inplace=True)
+        #
+        #     for new_name in new_file_names:
+        #         self.file_names_df["file_name"].append(new_name)
+        #     self.upload_file_names_df()
+
+        else:
+            file_name_lists = [self.applicant_csv_file_names_list, self.json_file_names_list,
+                               self.academy_csv_file_names_list, self.txt_file_names_list]
+            for list in file_name_lists:
+                for name in list:
+                    self.file_names_list.append(name)
+
+            self.file_names_df = pd.DataFrame(self.file_names_list).rename(columns={0: 'file_name'})
+            self.upload_file_names_df()
+
+        # else:
+        #     self.file_names_df = pd.DataFrame(self.file_names_df, columns=["file_name"])
+        #     self.file_names_df['file_name'].append(self.academy_df['original_file_name'])
+        #     self.file_names_df['file_name'].append(self.talent_df['original_file_name'])
+        #     self.file_names_df['file_name'].append(self.sparta_day_df['original_file_name'])
+        #     self.file_names_df['file_name'].append(self.applicant_df['original_file_name'])
+        #     self.upload_file_names_df()
+
+    def upload_file_names_df(self):
+        #Simple function for pushing file_names.csv into S3
+        buffer = io.StringIO()
+        self.file_names_df.to_csv(buffer)
+        s3_client.put_object(
+            Body=buffer.getvalue(),
+            Bucket=bucket_name,
+            Key='file_names.csv'
+        )
+
 
     # function to call retrieval functions for the specified file type
     def all_data_extractor(self):
