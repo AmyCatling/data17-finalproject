@@ -267,12 +267,11 @@ class Transform_sparta_day_txt:
         self.format_score()
         self.format_date()
         format_string_tables(sparta_day_df, 'academy')
-        #print(self.sparta_day_df)
 
     # Taking the date from the top of the txt file and put it into a list to put it into a column in the dataframe
     def format_date(self):
         dates = []
-        for index,row in self.sparta_day_df.iterrows():
+        for index, row in self.sparta_day_df.iterrows():
             dates.append(parse(row.date).date())
         self.sparta_day_df['date'] = dates
 
@@ -286,8 +285,8 @@ class Transform_sparta_day_txt:
                 ps_score.append(54)
                 pr_score.append(int(row.presentation.split(': ')[1].split('/')[0]))
             else:
-                ps_score.append(int(row.psychometrics.split(': ')[1].split('/')[0]))
-                pr_score.append(int(row.presentation.split(': ')[1].split('/')[0]))
+                ps_score.append(((int(row.psychometrics.split(': ')[1].split('/')[0]))/int(row.psychometrics.split(': ')[1].split('/')[1]))*100)
+                pr_score.append(((int(row.presentation.split(': ')[1].split('/')[0]))/int(row.presentation.split(': ')[1].split('/')[1]))*100)
         self.sparta_day_df['psychometrics'] = ps_score
         self.sparta_day_df['presentation'] = pr_score
 
@@ -298,9 +297,8 @@ def format_string_tables(df, column_name):
     unique = list(set(df[column_name]))
     f = LoadData(column_name, unique)
 
-
-# if __name__ == '__main__':
-
+if __name__ == '__main__':
+    pass
     # test = Transform_json()
     # test.talent_df['self_development'] = 'No'
     # print(test.talent_df.to_string())
@@ -316,8 +314,20 @@ def format_string_tables(df, column_name):
     # t.fix_dob_format()
     # t.replace_nan()
     # print(t.applicant_df.to_string())
+    # from final_project.extract import Extract
+    # extractor_academy_csv = Extract('academy_csv')
+    # extractor_academy_csv.all_data_extractor()
+    # t = Transform_sparta_day_txt(extractor_academy_csv.academy_df)
+    # print(extractor_academy_csv.skills_list)
 
-    # t = Transform_sparta_day_txt(sparta_day)
+    # extractor = Extract('txt')
+    # extractor.all_data_extractor()
+    # t = Transform_sparta_day_txt(extractor.sparta_day_df)
+    # print(t.sparta_day_df['presentation'].max())
+    # print(t.sparta_day_df['psychometrics'].max())
+    # print(t.sparta_day_df['psychometrics'])
+    # print(t.sparta_day_df['presentation'])
+
     # t.format_date()
     # t.format_score()
     # print(t.sparta_day_df.to_string())
