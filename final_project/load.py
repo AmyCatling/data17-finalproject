@@ -285,13 +285,13 @@ class LoadData:
         self.conn.commit()
 
 
-    def import_sparta_day_interview(self):
-        for index, row in self.talent_df.iterrows():
-            get_applicant = self.conn.execute("SELECT applicant_id FROM Applicants WHERE name = ?", row["name"])
-            applicant_id = get_applicant.fetchone()[0]
-            self.conn.execute("""INSERT INTO Sparta_Day_Interview(self_development, geo_flexible, financial_support_self, result, course_id, applicant_id)
-                              VALUES(?,?,?,?,?,?)
-            """, row.self_development, row.geo_flex, row.financial_support_self, row.result, course_id, applicant_id)
+    # def import_sparta_day_interview(self):
+    #     for index, row in self.talent_df.iterrows():
+    #         get_applicant = self.conn.execute("SELECT applicant_id FROM Applicants WHERE name = ?", row["name"])
+    #         applicant_id = get_applicant.fetchone()[0]
+    #         self.conn.execute("""INSERT INTO Sparta_Day_Interview(self_development, geo_flexible, financial_support_self, result, course_id, applicant_id)
+    #                           VALUES(?,?,?,?,?,?)
+    #         """, row.self_development, row.geo_flex, row.financial_support_self, row.result, course_id, applicant_id)
 
     # def import_sparta_day_assessment(self):
     #     get_acadamey = self.conn.execute("SELECT academy_id FROM Academies WHERE academy_id = ?", XXX)
