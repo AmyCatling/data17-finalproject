@@ -267,15 +267,18 @@ class LoadData:
 
 
     def import_student(self):
+        count = 0
         for index, row in self.academy_df.iterrows():
-                get_applicant = self.conn.execute("SELECT applicant_id FROM Applicants WHERE name = ?", row["name"])
-                print(get_applicant.fetchone()[0])
-                applicant_id = get_applicant.fetchone()[0]
+            get_applicant = self.conn.execute("SELECT applicant_id FROM Applicants WHERE name = ?", row["name"])
+            print(row["name"])
+            count += 1
+            print(count)
+            applicant_id = get_applicant.fetchone()[0]
 
-                get_stream = self.conn.execute("SELECT stream_id FROM Streams WHERE stream_name = ?", row.course_name)
-                stream_id = get_stream.fetchone()[0]
-                self.conn.execute("INSERT INTO Student (graduated, applicant_id, course_id) VALUES (?,?,?)", row.active, applicant_id, stream_id)
-                self.conn.commit()
+            get_stream = self.conn.execute("SELECT stream_id FROM Streams WHERE stream_name = ?", row.course_name)
+            stream_id = get_stream.fetchone()[0]
+            self.conn.execute("INSERT INTO Student (graduated, applicant_id, stream_id) VALUES (?,?,?)", row.Active, applicant_id, stream_id)
+        self.conn.commit()
     #
     # def import_sparta_day_interview(self):
     #     get_applicant = self.conn.execute("SELECT applicant_id FROM Applicants WHERE applicant_id=?", XXX)
