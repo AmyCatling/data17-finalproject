@@ -1,0 +1,23 @@
+Weekly_Results;
+DONE Behaviours;
+Student;
+DONE Applicants;
+DONE Gender;
+DONE City;
+DONE University_Details;
+DONE Degree_Grade;
+DONE Staff;
+DONE Streams;
+Courses;
+Sparta_Day_Interview;
+Sparta_Day_Assessment;
+DONE Academies;
+DONE - Strengths;
+DONE - Weaknesses;
+Strength_junction_table
+Weakness_junction_table;
+Talent_Technologies_junction;
+DONE Technologies;
+
+
+

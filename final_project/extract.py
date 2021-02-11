@@ -5,30 +5,32 @@ import json
 from pprint import pprint
 import boto3
 import logging
+import io
 
-
+#Extract class gets files from S3 and concatenates files of similar formats into Dataframes
 class Extract:
-    def __init__(self, filechoice, devcounter=False):
+    def __init__(self, devcounter=False):
         logging.info(f"------  initialised {__name__} class  ------")
-        # call methods
+
+        #get metadata for all files in S3
         self.get_bucket_contents()
-        self.keys_in_bucket = [item['Key'] for item in self.bucket_contents]
-        self.items_in_bucket = []
-        self.data_checker()
+        #List of all files in S3 bucket
+        self.items_in_bucket = [item['Key'] for item in self.bucket_contents]
 
-        self.academy_csv_df_list = []
-        self.applicant_csv_df_list = []
-        self.json_dict_list = []
-        self.sparta_day_df_list = []
+        self.check_file_names()
+        logging.info("Checked for new files in S3")
 
+        #Create empty dataframes
         self.academy_df = None
         self.applicant_df = None
         self.talent_df = None
         self.sparta_day_df = None
 
-        self.filechoice = filechoice
-        self.devcounter = devcounter
-
+        #Run functions to populate dataframes
+        self.applicant_csv_to_df()
+        self.academy_csv_to_df()
+        self.json_to_df()
+        self.txt_to_df()
 
     # function to retrieve everything from a bucket (>1000 items)
     def get_bucket_contents(self):
@@ -44,135 +46,147 @@ class Extract:
             except KeyError:
                 break
 
-    def data_checker(self):
-        for file in self.keys_in_bucket:
-            if file not in files_list:
-                self.items_in_bucket.append(file)
-                files_list.append(file)
+    ###check for new files in S3
+    def check_file_names(self):
+        #Run a check for if file_names.csv already exists. If it does not, it is created.
+        if "file_names.csv" not in self.items_in_bucket:
+            logging.info("Creating file: file_names.csv")
+            # create file: 'file_names.csv'
+            #A list is generated containing all file names in the bucket as well as 'file_name.csv' itself
+            self.file_names_list = [file for file in self.items_in_bucket]
+            self.file_names_list.append('file_names.csv')
+            #The list is used to build a dataframe, containing a single column: file_name
+            self.file_names_df = pd.DataFrame(self.file_names_list).rename(columns={0: 'file_name'})
+            #The upload function turns it into a csv and pushes to S3
+            ###self.upload_file_names_df() ###Un-comment this to create file_names file
+            logging.info("Uploaded file: file_names.csv")
+            #'file_names.csv' is popped from the list so that it does not unintentionally interfere with csv methods
+            self.file_names_list.remove('file_names.csv')
 
-    # function to call retrieval functions for the specified file type
-    def all_data_extractor(self):
-        logging.info(f"Loading data for {self.filechoice} files")
 
-        if self.filechoice == 'all':
-            for i in ['json', 'academy_csv', 'applicant_csv', 'txt']:
-                exec(f'self.retrieve_{i}_file_names()')
-                exec(f'self.{i}_to_df()')
         else:
-            exec(f'self.retrieve_{self.filechoice}_file_names()')
-            exec(f'self.{self.filechoice}_to_df()')
+            logging.info("Getting file names from file_names.csv")
+            #If 'file_names.csv' does exist in S3 it will be downloaded
+            #The csv will be turned back into a dataframe and then values extracted into a list of old file names
+            s3_object = s3_client.get_object(Bucket=bucket_name, Key='file_names.csv')
+            self.file_names_df = pd.read_csv(s3_object['Body'])
+            old_files = self.file_names_df['file_name'].values.tolist()
+            #self.file_names_list is then altered to remove all old file names, so they will not be retrieved from S3
+            self.file_names_list = [i for i in self.items_in_bucket if i not in old_files]
+            self.file_names_list.append("file_names.csv")
 
+            #A dataframe containing the names of all new files is created
+            self.new_files_df = pd.DataFrame(self.file_names_list).rename(columns={0: 'file_name'})
+            #The new_files_df is concatenated onto the file_names_df and reassigned
+            self.file_names_df = pd.concat([self.file_names_df, self.new_files_df])
+            #This new df of all currently used file names is then reuploaded to S3, overwriting the old version
+            ###self.upload_file_names_df() ###Un-comment this to create file_names file
+            logging.info("updated file: file_names.csv")
+            #As before, 'file_names.csv' is popped to not interfere with csv methods
+            self.file_names_list.remove('file_names.csv')
+        logging.info(f"There are {len(self.file_names_list)} files to extract")
 
-    # 4 functions to retrieve files of each format
-    def retrieve_academy_csv_file_names(self):
-        self.academy_csv_file_names_list = [file for file
-                                            in fnmatch.filter(self.items_in_bucket, '*.csv')
-                                            if file not in fnmatch.filter(self.items_in_bucket, '*Applicants.csv')]
-        logging.info(f"A total of {len(self.academy_csv_file_names_list)} Academy csv files were found in Amazon S3")
-
-    def retrieve_applicant_csv_file_names(self):
-        self.applicant_csv_file_names_list = fnmatch.filter(self.items_in_bucket, '*Applicants.csv')
-        logging.info(f"A total of {len(self.applicant_csv_file_names_list)} Applicant csv files were found in Amazon S3")
-
-    def retrieve_json_file_names(self):
-        self.json_file_names_list = fnmatch.filter(self.items_in_bucket, '*.json')
-        logging.info(f"A total of {len(self.json_file_names_list)} json files were found in Amazon S3")
-
-    def retrieve_txt_file_names(self):
-        self.txt_file_names_list = fnmatch.filter(self.items_in_bucket, '*.txt')
-        logging.info(f"A total of {len(self.txt_file_names_list)} txt files were found in Amazon S3")
+    def upload_file_names_df(self):
+        # Simple function for pushing file_names.csv into S3
+        buffer = io.StringIO()
+        self.file_names_df.to_csv(buffer, index=False)
+        s3_client.put_object(
+            Body=buffer.getvalue(),
+            Bucket=bucket_name,
+            Key='file_names.csv'
+        )
 
     #4 functions to get files from S3, add columns and convert to dataframes
     def academy_csv_to_df(self):
-        for file in self.academy_csv_file_names_list:
-            key = file
-            s3_object = s3_client.get_object(Bucket=bucket_name, Key=key)
-            file = s3_object['Body']
-            df = pd.read_csv(file)
+        logging.info("Extracting academy csv files")
+        self.files_to_extract = [file for file in self.file_names_list if '.csv' in file and 'Academy/' in file]
 
-            df.insert(0, 'original_file_name', '')
-            df.insert(1, 'course_name', '')
-            df.insert(2, 'date', '')
+        for file in self.files_to_extract:
+            s3_object = s3_client.get_object(Bucket=bucket_name, Key=file)
+            file_obj = s3_object['Body']
+            df = pd.read_csv(file_obj)
 
-            df['original_file_name'] = key
-            df['course_name'] = (key.split('/')[1]).rsplit('_', 1)[0]
-            df['date'] = ((key.split('/')[1]).rsplit('_', 1)[1]).split('.')[0]
 
-            self.academy_csv_df_list.append(df)
-        self.academy_df = pd.concat(self.academy_csv_df_list)
+
+            df.insert(0, 'original_file_name', file)
+            df.insert(1, 'course_name', (file.split('/')[1]).rsplit('_', 1)[0])
+            df.insert(2, 'date', ((file.split('/')[1]).rsplit('_', 1)[1]).split('.')[0])
+
+            self.academy_df = pd.concat([df, self.academy_df])
         logging.info("Academy_csv files have been successfully concatenated and are stored in the variable academy_df")
-            # .drop_duplicates() Can be used to drop duplicates, can be used in the future
 
 
     def applicant_csv_to_df(self):
-        for file in self.applicant_csv_file_names_list:
-            key = file
-            s3_object = s3_client.get_object(Bucket=bucket_name, Key=key)
-            file = s3_object['Body']
-            df = pd.read_csv(file)
-            df.insert(0, 'original_file_name', '')
-            df['original_file_name'] = key
-            self.applicant_csv_df_list.append(df)
-        self.applicant_df = pd.concat(self.applicant_csv_df_list)
+        logging.info("Extracting applicant csv files")
+        self.files_to_extract = [file for file in self.file_names_list if '.csv' in file and 'Talent/' in file]
+
+        for file in self.files_to_extract:
+            s3_object = s3_client.get_object(Bucket=bucket_name, Key=file)
+            file_obj = s3_object['Body']
+            df = pd.read_csv(file_obj)
+
+            df.insert(0, 'original_file_name', file)
+            self.applicant_df = pd.concat([df, self.applicant_df])
         logging.info("Applicant_csv files have been successfully concatenated and are stored in the variable applicant_df")
-            # .drop_duplicates() Can be used to drop duplicates, can be used in the future
 
     def json_to_df(self):
+        logging.info("Extracting json files")
+        self.files_to_extract = [file for file in self.file_names_list if '.json' in file]
+
         count = 0
-        for file in self.json_file_names_list:
-            key = file
-            s3_object = s3_client.get_object(Bucket=bucket_name, Key=key)
-            file = s3_object['Body']
-            jsondict = json.load(file)
+        for file in self.files_to_extract:
+            s3_object = s3_client.get_object(Bucket=bucket_name, Key=file)
+            file_obj = s3_object['Body']
+            jsondict = json.load(file_obj)
             jsondf = pd.DataFrame([jsondict])
-            jsondf.insert(0, 'original_file_name', '')
-            jsondf['original_file_name'] = key
-            self.json_dict_list.append(jsondf)
+            jsondf.insert(0, 'original_file_name', file)
+
+            self.talent_df = pd.concat([jsondf, self.talent_df])
             count += 1
             if count > 100:
                 break
-        self.talent_df = pd.concat(self.json_dict_list)
         logging.info("JSON files have been successfully concatenated and are stored in the variable talent_df")
-            # .drop_duplicates() Can be used to drop duplicates, can be used in the future
 
     def txt_to_df(self):
-        for file in self.txt_file_names_list:
-            key = file
-            s3_object = s3_client.get_object(Bucket=bucket_name, Key=key)
-            file = s3_object['Body']
-            test_df = pd.read_csv(file, header=None, skiprows=3)
-            test_df.columns = ['name', 'presentation']
+        logging.info("Extracting text files")
+        self.files_to_extract = [file for file in self.file_names_list if '.txt' in file]
+
+        for file in self.files_to_extract:
+            s3_object = s3_client.get_object(Bucket=bucket_name, Key=file)
+            file_obj = s3_object['Body']
+            df = pd.read_csv(file_obj, header=None, skiprows=3)
+
+            df.columns = ['name', 'presentation']
+
+            #Add name, file_name and psychometric columns to dataframe
             names = []
             psychometric = []
-            for index, row in test_df.iterrows():
-                names.append(row['name'].rsplit(' - ', 1)[0]) ###Remove 'r' if this breaks stuff
+            for index, row in df.iterrows():
+                names.append(row['name'].rsplit(' - ', 1)[0])
                 psychometric.append(row['name'].rsplit(' - ', 1)[1])
-            test_df['name'] = names
-            test_df['psychometrics'] = psychometric
-            # test_df[['name', 'psychometrics']] = test_df['name'].str.split('-')[0]
-            test_df['original_file_name'] = key
-            s3_object2 = s3_client.get_object(Bucket=bucket_name, Key=key)
-            file2 = s3_object2['Body'].read().decode('utf-8')
-            for line in [file2]:
+            df['name'] = names
+            df['psychometrics'] = psychometric
+            df['original_file_name'] = file
+
+            # we define s3_object again to now read the skipped rows
+            s3_object2 = s3_client.get_object(Bucket=bucket_name, Key=file)
+            file_obj2 = s3_object2['Body'].read().decode('utf-8')
+
+            #add date and academy columns to df
+            for line in [file_obj2]:
                 date = [line.split('\r\n')][0][0]
                 academy = [line.split('\r\n')][0][1]
-            test_df['date'] = date
-            test_df['academy'] = academy.split()[0]
-            test_df = test_df[['original_file_name', 'academy', 'date', 'name', 'psychometrics', 'presentation']]
-            self.sparta_day_df_list.append(test_df)
-        self.sparta_day_df = pd.concat(self.sparta_day_df_list)
+            df['date'] = date
+            df['academy'] = academy.split()[0]
+
+            df = df[['original_file_name', 'academy', 'date', 'name', 'psychometrics', 'presentation']]
+            
+            self.sparta_day_df = pd.concat([df, self.sparta_day_df])
         logging.info("Text files have been successfully concatenated and are stored in the variable sparta_day_df")
-            # .drop_duplicates() Can be used to drop duplicates, can be used in the future
-
-
-    def create_csv(self):
-        pass
-        # self.talent_df.to_csv(r'C:\Users\lucio\PycharmProjects\data17-finalproject\talent.csv', index=False)
-        # self.academy_df.to_csv(r'C:\Users\lucio\PycharmProjects\data17-finalproject\academy.csv', index=False)
-
-
-
 
 if __name__ == '__main__':
-    instance = Extract('all')
-
+    instance = Extract()
+    print(type(instance.academy_df))
+    print(instance.applicant_df)
+    print(instance.talent_df)
+    print(instance.sparta_day_df)

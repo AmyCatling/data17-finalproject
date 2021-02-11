@@ -43,7 +43,8 @@ CREATE TABLE University_Details (
 
 CREATE TABLE Degree_Grade (
     degree_grade_id INT NOT NULL IDENTITY PRIMARY KEY,
-    classification VARCHAR(10)
+    classification VARCHAR(20)
+
 );
 
 CREATE TABLE Staff (
@@ -59,8 +60,10 @@ CREATE TABLE Applicants (
     email VARCHAR(320),
     city_id INT FOREIGN KEY REFERENCES City(city_id),
     address VARCHAR(MAX),
+
     postcode_area VARCHAR(10),
     phone_number VARCHAR(30),
+
     university_id INT FOREIGN KEY REFERENCES University_Details(university_id),
     degree_grade_id INT FOREIGN KEY REFERENCES Degree_Grade(degree_grade_id),
     staff_id INT FOREIGN KEY REFERENCES Staff(staff_id)
