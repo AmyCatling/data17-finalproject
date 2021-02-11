@@ -4,9 +4,6 @@ import pyodbc
 import base64
 
 
-
-
-
 class AppData:
 
     def __init__(self):
@@ -65,6 +62,7 @@ class AppData:
     def set_chosen_course(self, course_name):
         self.chosen_course = course_name
         self.get_stu_names()
+        self.get_course_table()
 
 
     def set_chosen_student(self, student_name):
@@ -117,12 +115,75 @@ class AppData:
         self.get_stu_weaknesses()
         self.get_stu_strengths()
 
-
-
-
-
         self.other_info_table['Strengths'] = str(self.strengths_list)[1:-1].replace("'", "")
         self.other_info_table['Weaknesses'] = str(self.weaknesses_list)[1:-1].replace("'", "")
+
+    def get_successful_applicants(self):
+        successful = pd.read_sql("""SELECT COUNT(result) AS "successful" FROM Sparta_day_interview WHERE result =1""", self.docker)["successful"][0]
+
+        all = pd.read_sql("""SELECT COUNT(*) AS "Total" FROM Applicants""", self.docker)["Total"][0]
+
+        successful_percentage = round((float(successful) / float(all) * 100), 2)
+        self.successful_percentage_df = pd.DataFrame([successful_percentage])
+        self.successful_percentage_df.columns = ["Percentage of Successful Applicants"]
+
+
+
+    # distribution of degree classification for successful applicants
+    def get_degree_classification_df(self):
+        self.degree_class_df = pd.read_sql("""
+                                           SELECT d.classification AS "Degree Classification", 
+                                           COUNT(a.degree_grade_id) AS "Count" 
+                                           FROM Applicants a
+                                           JOIN Degree_Grade d ON a.degree_grade_id = d.degree_grade_id
+                                           JOIN Sparta_day_interview i ON i.applicant_id = a.applicant_id
+                                           WHERE i.result = 1
+                                           GROUP BY a.degree_grade_id, d.classification
+                                            """, self.docker)
+    # number of applicants each year
+    def get_annual_applicants_df(self):
+        self.annual_applicants_df = pd.read_sql("""
+                                                SELECT YEAR(sparta_day_date) AS "Year", 
+                                                COUNT(YEAR(sparta_day_date)) AS "Number of Applicants"
+                                                FROM Sparta_day_assessment 
+                                                GROUP BY YEAR(sparta_day_date)
+                                                """, self.docker)
+
+    # avg psychometric and pres scores for successful applicants
+    def get_avg_psy_pres_scores_df(self):
+        self.scores_df = pd.read_sql("""
+                                    SELECT AVG(psychometric_score) AS "Psychometric Test", 
+                                    AVG(presentation_score) AS "Presentation"
+                                    FROM Sparta_day_assessment s
+                                    JOIN Applicants a ON a.applicant_id = s.applicant_id
+                                    JOIN Sparta_day_interview i ON i.applicant_id = a.applicant_id
+                                    WHERE i.result=1
+                                    """, self.docker)
+
+        self.scores_df = self.scores_df.T
+
+        self.scores_df.columns = ["Average Score"]
+        self.scores_df['Assessment'] = ['Psychometric', 'Presentation']
+
+        self.scores_df = self.scores_df[["Assessment", "Average Score"]]
+
+
+
+
+    def get_course_table(self):
+        self.course_info_df = pd.read_sql(f"""
+                                            SELECT c.course_name AS "Course", s.staff_name AS "Trainer", 
+                                            COUNT(a.applicant_id) AS "Number of Trainees"
+                                            FROM Courses c
+                                            JOIN Staff s ON s.staff_id = c.staff_id
+                                            JOIN Applicants a ON s.staff_id = a.staff_id
+                                            WHERE c.course_name = '{self.chosen_course}'
+                                            GROUP BY c.course_name, s.staff_name
+                                            """, self.docker)
+
+
+
+
 
 
 
@@ -132,4 +193,17 @@ if __name__ == '__main__':
     t = AppData()
     t.set_chosen_course('test_21')
     t.set_chosen_student('John Smith')
-    print(t.other_info_table['Strengths'])
+    t.get_avg_psy_pres_scores_df()
+    t.get_successful_applicants()
+    t.get_course_table()
+
+
+
+
+
+
+
+
+
+
+
