@@ -87,7 +87,7 @@ CREATE TABLE Weekly_Results (
 
 CREATE TABLE Student (
     applicant_id INT FOREIGN KEY REFERENCES Applicants(applicant_id),
---    course_id INT FOREIGN KEY REFERENCES Courses(course_id)
+    stream_id INT FOREIGN KEY REFERENCES Stream(stream_id)
     graduated CHAR(1)
 );
 

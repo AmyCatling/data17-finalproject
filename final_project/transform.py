@@ -99,13 +99,8 @@ class Transform_academy_csv:
 
     def week_number(self):
         self.week_number_list = [i for i in range(1, int(self.academy_df.columns[-1].split('_W')[1])+1)]
-        print(self.week_number_list)
         f = LoadData('week_number', self.week_number_list)
         logging.info("List of week numbers created")
-
-    def week_number(self):
-        self.week_number_list = [i for i in range(1, int(self.academy_df.columns[-1].split('_W')[1])+1)]
-        f = LoadData('week_number', self.week_number_list)
 
 
 # Class for transforming the Talent Day json dataframe

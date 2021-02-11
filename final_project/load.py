@@ -53,29 +53,24 @@ class LoadData:
         elif load_choice == 'invited_by':
             self.staff_list_2 = df
             self.import_staff_two()
-        elif load_choice == 'course_name':
-            self.streams_list = df
+        elif load_choice == 'academy_df':
+            self.academy_df = df
             self.import_stream()
+            self.import_weekly_results()
+            self.import_student()
         elif load_choice == 'applicant_df':
             self.applicant_df = df
             # print(self.applicant_df.to_string())
             self.import_applicants()
-        # elif load_choice == 'applicant_df':
-        #     self.applicant_df = df
-        #     if load_choice == 'behaviours':
-        #         self.behaviours_list = df
-        #     if load_choice == 'week_number':
-        #         self.week_number_list = df
-            #load_choice == 'score'
-           # self.score_list = df
-
-        #    self.import_weekly_results()
+        #elif load_choice == 'academy_df':
+        #    self.academy_df = df
+        #
         # elif load_choice == 'academy_df':
         #     self.academy_df = df
         #     self.import_courses()
-        elif load_choice == 'academy_df':
-            self.academy_df = df
-            self.import_student()
+        #elif load_choice == 'academy_df':
+        #    self.academy_df = df
+
         elif load_choice == 'talent_df':
             self.talent_df = df
             self.import_sparta_day_interview()
@@ -221,14 +216,22 @@ class LoadData:
 
     # Importing the stream name into the Streams table in the SQL Database
     def import_stream(self):
-        for stream in self.streams_list:
-            check = self.conn.execute('SELECT stream_name FROM Streams WHERE stream_name = ?', stream)
-            try:
-                stream == check.fetchone()[0]
-            except TypeError:
-                logging.info(f'The {stream} has now been imported')
-                self.conn.execute('INSERT INTO Streams (stream_name) VALUES (?)', stream)
-                self.conn.commit()
+
+        final_list =[]
+        stream_name_list = list(self.academy_df['course_name'])
+        course_start_date_list = list(self.academy_df['course_start_date'])
+        course_end_date_list = list(self.academy_df['course_end_date'])
+        for index in range(len(course_start_date_list)):
+            final_list.append([stream_name_list[index], course_start_date_list[index], course_end_date_list[index]])
+
+        streams = []
+        for listie in final_list:
+            if listie not in streams:
+                streams.append(listie)
+
+        for stream in streams:
+            self.conn.execute('INSERT INTO Streams (stream_name, start_date, end_date) VALUES (?,?,?)', stream[0], stream[1], stream[2])
+        self.conn.commit()
 
     # Importing the information about each applicant to Sparta into the Applicants table in the SQL Database
     def import_applicants(self):
@@ -248,53 +251,25 @@ class LoadData:
             self.conn.commit()
 
 
-    # def import_weekly_results(self):
-    #     print(self.behaviours_list)
-    #     print(self.week_number_list)
-        # print(self.score_list)
-    #             for index, row in self.applicant_df.iterrows():
-    #         self.applicant_df = df
-    #         get_applicant_id = self.conn.execute("SELECT applicant_id FROM Applicants WHERE name = ?", row['name'])
-    #         applicant_id = get_applicant_id.fetchone()
-    #         for b in behaviour_list:
-    #             self.behaviours_list= df
-    #             get_behaviour_id = self.conn.execute("SELECT behaviour_id FROM Behaviours WHERE behaviour_name = ?",
-    #                                                  row.behaviour)
-    #             behaviour_id = get_behaviour_id.fetchone()
-    #             for week in week_number_list:
-    #                 self.week_number_list = df
-    #                 for score in score_list:
-    #         try:
-    #             get_applicant_id = self.conn.execute("SELECT applicant_id FROM Applicants WHERE name = ?", row['name'])
-    #             applicant_id = get_applicant_id.fetchone()
-    #             get_behaviour_id = self.conn.execute("SELECT behaviour_id FROM Behaviours WHERE behaviour_name = ?", row.behaviour)
-    #             behaviour_id = get_behaviour_id.fetchone()
-    #         except:
-    #             self.conn.execute("INSERT INTO Weekly_Results (applicant_id, behaviour_id, week_number, score) Values (?,?,?,?)", applicant_id, behaviour_id, w)
-    #
+    def import_weekly_results(self):
+        print('hello')
 
-    # Similar to applicants, course calls for the LoadData class from main using the 'academy_df' as the DF:
+        behaviours = self.conn.execute("SELECT * FROM Behaviours").fetchall()
+        b_names = []
+        b_ids = []
+        for i in behaviours:
+            b_names.append(behaviours[1])
+            b_ids.append(behaviours[0])
 
-    # for row in ....
-    # if [column_name]== analytical_w1:
-    # INSERT INTO(.... Values behavourid=x  week_number=1 , score= rows)
 
-    # def import_stream(self):
-    #     for index, row in self.academy_df:
-    #         get_staff = self.conn.execute("SELECT staff_id FROM Staff WHERE staff_name=?", row.trainer)
-    #         staff_id = get_staff.fetchone()[0]
-    #         self.conn.execute("SELECT course_name FROM Course WHERE course_name = ?", self.academy_df.course_name)
-    #         self.conn.execute("INSERT INTO Course (course_name, staff_id) VALUES (?,?)", row.course_name, staff_id)
-    #         self.conn.commit()
-
-    # def import_courses(self):
-    #     for index, row in self.academy_df.iterrows():
-    #           get_stream = self.conn.execute("SELECT stream_id FROM Streams WHERE stream_name = ?", row.stream_name)
-    #           stream_id = get_stream.fetchone()[0]
-    #           get_staff = self.conn.execute("SELECT staff_id FROM Staff WHERE staff_name = ?", row.trainer)
-    #           staff_id = get_staff.fetchone()[0]
-    #           self.conn.execute("INSERT INTO Course (course_name, stream_id, staff_id) VALUES (?,?,?)", row.course_name, stream_id, staff_id)
-    #      self.conn.commit()
+        for index, row in self.academy_df.iterrows():
+            get_applicant_id = self.conn.execute("SELECT applicant_id FROM Applicants WHERE name = ?", row['name'])
+            applicant_id = get_applicant_id.fetchone()
+            for i in range(len(b_names)):
+                for week in range(1,11):
+                    score = row[(b_names[i]+ '_W' + str(week))]
+                    self.conn.execute("INSERT INTO Weekly_Results (applicant_id, behaviour_id, week_number, score) Values (?,?,?,?)", applicant_id, b_ids[i], week, score)
+        self.conn.commit()
 
     def import_student(self):
         for index, row in self.academy_df.iterrows():
@@ -328,15 +303,30 @@ class LoadData:
         self.conn.commit()
 
     def import_strength_junction_table(self):
+        # for index, row in self.talent_df.iterrows():
+        #     get_applicant = self.conn.execute("SELECT applicant_id FROM Applicants WHERE applicant_name = ?",
+        #                                       row["name"])
+        #     applicant_id = get_applicant.fetchone()[0]
+        #     for strength in self.talent_df['strengths']:
+        #         get_strength = self.conn.execute("SELECT strength_id FROM Strengths WHERE strength_name = ?", strength)
+        #         strength_id = get_strength.fetchone()[0]
+        #
+        #         self.conn.execute("INSERT INTO Strength_junction_table (applicant_id, strength_id) VALUES (?,?)", applicant_id, strength_id)
+        # self.conn.commit()
         for index, row in self.talent_df.iterrows():
-            get_applicant = self.conn.execute("SELECT applicant_id FROM Applicants WHERE applicant_name = ?",
-                                              row["name"])
-            applicant_id = get_applicant.fetchone()[0]
-            for strength in self.talent_df['strengths']:
-                get_strength = self.conn.execute("SELECT strength_id FROM Strengths WHERE strength_name = ?", strength)
-                strength_id = get_strength.fetchone()[0]
 
-                self.conn.execute("INSERT INTO Strength_junction_table (applicant_id, strength_id) VALUES (?,?)", applicant_id, strength_id)
+            for strength in self.row['strengths']:
+                for i in strength:
+
+                    get_strength = self.conn.execute("SELECT strength_id FROM Strengths WHERE strength_name = ?", i)
+                    strength_id = get_strength.fetchone()[0]
+
+                    get_applicant = self.conn.execute("SELECT applicant_id FROM Applicants WHERE LOWER(name) = ?",
+                                                      row["name"].lower())
+                    applicant_id = get_applicant.fetchone()[0]
+
+                    self.conn.execute("INSERT INTO Strength_junction_table (applicant_id, strength_id) VALUES (?,?)",
+                                      applicant_id, strength_id)
         self.conn.commit()
 
     def import_weakness_junction_table(self):
