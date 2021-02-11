@@ -20,9 +20,10 @@ class Transform_academy_csv:
         self.deactive_nulls()
         logging.info("test logging")
         self.behaviour_take_column_name()
+        self.week_number()
         format_string_tables(academy_df, "trainer")
         format_string_tables(academy_df, "course_name")
-        # self.week_number()
+        # format_string_tables(academy_df, "score")
 
 
 
@@ -78,12 +79,9 @@ class Transform_academy_csv:
 
         f = LoadData('behaviours', self.skills_list)
 
-    # def week_number(self):
-    #     get_week_number_list = [i[-1] for i in self.academy_df.columns if "W" in i]
-    #     self.week_number_list = list(set(get_week_number_list))
-    #     #self.week_number_list = [0,1,2,3,4,5,6,7,8,9,10]
-    #     print(self.week_number_list)
-    #     f = LoadData('week_number', self.week_number_list)
+    def week_number(self):
+        self.week_number_list = [i for i in range(1, int(self.academy_df.columns[-1].split('_W')[1])+1)]
+        f = LoadData('week_number', self.week_number_list)
 
 
 # Class for transforming the Talent Day json dataframe
