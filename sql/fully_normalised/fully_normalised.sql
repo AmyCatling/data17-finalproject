@@ -77,15 +77,17 @@ CREATE TABLE Weekly_Results (
     score INT
 );
 
-CREATE TABLE Courses (
-    course_id INT NOT NULL IDENTITY PRIMARY KEY,
-    course_name VARCHAR(20),
-    staff_id INT FOREIGN KEY REFERENCES Staff(staff_id)
-);
+--CREATE TABLE Courses (
+--    course_id INT NOT NULL IDENTITY PRIMARY KEY,
+--    course_name VARCHAR(20),
+--    stream_id INT FOREIGN KEY REFERENCES Streams(stream_id),
+--    staff_id INT FOREIGN KEY REFERENCES Staff(staff_id)
+--);
+
 
 CREATE TABLE Student (
     applicant_id INT FOREIGN KEY REFERENCES Applicants(applicant_id),
-    course_id INT FOREIGN KEY REFERENCES Courses(course_id),
+--    course_id INT FOREIGN KEY REFERENCES Courses(course_id)
     graduated CHAR(1)
 );
 
@@ -95,7 +97,7 @@ CREATE TABLE Sparta_Day_Interview (
     geo_flexible BIT,
     financial_support_self BIT,
     result BIT,
-    course_id INT FOREIGN KEY REFERENCES Courses(course_id),
+--    course_id INT FOREIGN KEY REFERENCES Courses(course_id),
     applicant_id INT FOREIGN KEY REFERENCES Applicants(applicant_id)
 );
 
