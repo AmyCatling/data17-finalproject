@@ -6,24 +6,26 @@ import datetime
 from dateutil.parser import parse
 from final_project.load import LoadData
 import logging
+from final_project.extract import Extract
 
 
 # Class for transforming the Academy CSV dataframe
 # Also initialise cleaning and column name list for behaviours
 class Transform_academy_csv:
     def __init__(self, academy_df):
+        logging.info(f"----- Initialising {__name__} class -----")
         self.academy_df = academy_df
         self.add_columns()
         self.active_nulls()
-        self.floats_to_ints()
         self.null_rename()
         self.deactive_nulls()
-        logging.info("test logging")
         self.behaviour_take_column_name()
         self.week_number()
+        self.floats_to_ints()
         format_string_tables(academy_df, "trainer")
         format_string_tables(academy_df, "course_name")
-        # format_string_tables(academy_df, "score")
+        self.score_range = []
+        self.get_score_range()
 
 
 
@@ -35,6 +37,8 @@ class Transform_academy_csv:
         self.academy_df.insert(4, "Active", row_list, True)
         logging.info("Successfully added active column")
 
+
+
     # Null values are replaced with 99, an obviously false value
     def active_nulls(self):
         for column in self.academy_df:
@@ -43,6 +47,7 @@ class Transform_academy_csv:
                     self.academy_df[column].fillna(99, inplace=True)
                 else:
                     self.academy_df[column].fillna(0, inplace=True)
+        logging.info("filled nulls for academy_df table")
 
     # If column equal to 99, removed from course, else trainee graduated
     def null_rename(self):
@@ -53,12 +58,14 @@ class Transform_academy_csv:
             else:
                 active_list.append('Y')
         self.academy_df['Active'] = active_list
+        logging.info("Updated spartan status in academy_df table")
 
     # The characteristic columns all contain a "_W" so they can be found that way
     def floats_to_ints(self):
         for column in self.academy_df:
             if "_W" in column:
                 self.academy_df[column] = self.academy_df[column].astype(int)
+        logging.info("Weekly scores converted into integers")
 
     # Change all 99 and 0 to null then change all nulls to 0
     def deactive_nulls(self):
@@ -69,15 +76,32 @@ class Transform_academy_csv:
     # Taking the Sparta Behaviours from the academy_df and producing a list of the unique behaviours
     # Then send it to LoadData
     def behaviour_take_column_name(self):
-        # print(self.academy_df.columns)
-        # self.skills_list = []
-        # for i in self.academy_df.columns:
-        #     if "_W2" in i:
-        #         self.skills_list.append(i[0:-3])
         self.skills_list = [i[0: -3] for i in self.academy_df.columns if "_W2" in i]
-        # print(self.skills_list)
-
         f = LoadData('behaviours', self.skills_list)
+        logging.info("Gathered skills from academy_df table")
+
+
+    # def course_take_column_name(self):
+        # self.course_list = [ i[xxxx] for i in self.academy_df['course_name'] ]
+        # f = LoadData('courses', self.courses_list)
+        # logging.info("Collected different courses from academy_df")
+
+
+    def get_score_range(self):
+        values_list = []
+        for column in self.academy_df:
+            if "_W" in column:
+                for value in self.academy_df[column]:
+                    if value !=0:
+                        values_list.append(value)
+        self.score_range = list(set(values_list))
+        f = LoadData('scores', self.score_range)
+
+    def week_number(self):
+        self.week_number_list = [i for i in range(1, int(self.academy_df.columns[-1].split('_W')[1])+1)]
+        print(self.week_number_list)
+        f = LoadData('week_number', self.week_number_list)
+        logging.info("List of week numbers created")
 
     def week_number(self):
         self.week_number_list = [i for i in range(1, int(self.academy_df.columns[-1].split('_W')[1])+1)]
@@ -111,6 +135,7 @@ class Transform_json:
                 elif entry == 'No' or entry == 'Fail':
                     column_list.append(0)
             self.talent_df[column] = column_list
+        logging.info("Applicant pass/fail booleans assigned correct datatype")
 
     # Fill null values with the string 'None'
     def fix_nulls(self):
@@ -296,38 +321,13 @@ def format_string_tables(df, column_name):
     f = LoadData(column_name, unique)
 
 if __name__ == '__main__':
-    pass
-    # test = Transform_json()
-    # test.talent_df['self_development'] = 'No'
-    # print(test.talent_df.to_string())
-    # test.json_active_bits()
-    # print(test.talent_df.to_string())
-    # print(test.talent_df['geo_flex'].dtype)
-    # # test.date_types_changed()
+    logging.basicConfig(filename='logtest.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s',
+                        level=logging.INFO)
+    logging.info("========  Initialised log file  ========")
 
-    # t = Transform_applicant_csv('df')
-    # t.drop_id_column()
-    # t.fix_applicants_invite_format()
-    # t.format_phones()
-    # t.fix_dob_format()
-    # t.replace_nan()
-    # print(t.applicant_df.to_string())
-    # from final_project.extract import Extract
-    # extractor_academy_csv = Extract('academy_csv')
-    # extractor_academy_csv.all_data_extractor()
-    # t = Transform_sparta_day_txt(extractor_academy_csv.academy_df)
-    # print(extractor_academy_csv.skills_list)
 
-    # extractor = Extract('txt')
-    # extractor.all_data_extractor()
-    # t = Transform_sparta_day_txt(extractor.sparta_day_df)
-    # print(t.sparta_day_df['presentation'].max())
-    # print(t.sparta_day_df['psychometrics'].max())
-    # print(t.sparta_day_df['psychometrics'])
-    # print(t.sparta_day_df['presentation'])
+    extract = Extract()
+    test_academy_csv = Transform_academy_csv(extract.academy_df)
+    # print(test_academy_csv.academy_df.to_string())
+    print(test_academy_csv.score_range)
 
-    # t.format_date()
-    # t.format_score()
-    # print(t.sparta_day_df.to_string())
-
-    # test = Transform_academy_csv()

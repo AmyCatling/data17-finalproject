@@ -16,15 +16,6 @@ def almighty_method():
     loader1 = LoadData(load_choice='academy_df', df=transformer1.academy_df)
     loader2 = LoadData(load_choice='talent_df', df=transformer2.talent_df)
     loader4 = LoadData(load_choice='sparta_day_df', df=transformer4.sparta_day_df)
-
-
-# extract_test = Extract()
-# print(extract_test.file_names_list)
-# print(extract_test.files_to_extract)
-# print(extract_test.academy_df)
-# print(extract_test.applicant_df)
-# print(extract_test.talent_df)
-# print(extract_test.sparta_day_df)
     
 almighty_method()
 

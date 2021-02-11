@@ -6,6 +6,7 @@ from pprint import pprint
 import boto3
 import logging
 import io
+import datetime
 
 #Extract class gets files from S3 and concatenates files of similar formats into Dataframes
 class Extract:
@@ -108,7 +109,22 @@ class Extract:
 
             df.insert(0, 'original_file_name', file)
             df.insert(1, 'course_name', (file.split('/')[1]).rsplit('_', 1)[0])
-            df.insert(2, 'date', ((file.split('/')[1]).rsplit('_', 1)[1]).split('.')[0])
+            df.insert(2, 'course_start_date', ((file.split('/')[1]).rsplit('_', 1)[1]).split('.')[0])
+            df.insert(3, 'course_end_date', datetime)
+
+            for row in df['course_start_date'].values.tolist():
+                start_date = datetime.datetime.strptime(row, '%Y-%m-%d')
+
+                list = []
+                for column in df.columns:
+                    try:
+                        int(column.split('_W')[1])
+                        list.append(int(column.split('_W')[1]))
+                    except:
+                        pass
+                week = max(list)
+                weeks = datetime.timedelta(weeks=week)
+                df['course_end_date'] = start_date + weeks
 
             self.academy_df = pd.concat([df, self.academy_df])
         logging.info("Academy_csv files have been successfully concatenated and are stored in the variable academy_df")
@@ -184,7 +200,7 @@ class Extract:
 
 if __name__ == '__main__':
     instance = Extract()
-    print(type(instance.academy_df))
-    print(instance.applicant_df)
-    print(instance.talent_df)
-    print(instance.sparta_day_df)
+    # print(instance.academy_df.to_sting())
+    # print(instance.applicant_df)
+    # print(instance.talent_df)
+    # print(instance.sparta_day_df)

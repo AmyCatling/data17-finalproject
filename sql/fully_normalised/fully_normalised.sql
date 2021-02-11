@@ -44,6 +44,7 @@ CREATE TABLE University_Details (
 CREATE TABLE Degree_Grade (
     degree_grade_id INT NOT NULL IDENTITY PRIMARY KEY,
     classification VARCHAR(20)
+
 );
 
 CREATE TABLE Staff (
@@ -51,21 +52,18 @@ CREATE TABLE Staff (
     staff_name VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE Streams (
-    stream_id INT NOT NULL IDENTITY PRIMARY KEY,
-    stream_name VARCHAR(20)
-);
-
 CREATE TABLE Applicants (
     applicant_id INT NOT NULL IDENTITY PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
+    name VARCHAR(200) NOT NULL,
     gender_id INT FOREIGN KEY REFERENCES Gender(gender_id),
     dob DATE,
     email VARCHAR(320),
     city_id INT FOREIGN KEY REFERENCES City(city_id),
     address VARCHAR(MAX),
-    postcode_area VARCHAR(4),
-    phone_number CHAR(13),
+
+    postcode_area VARCHAR(10),
+    phone_number VARCHAR(30),
+
     university_id INT FOREIGN KEY REFERENCES University_Details(university_id),
     degree_grade_id INT FOREIGN KEY REFERENCES Degree_Grade(degree_grade_id),
     staff_id INT FOREIGN KEY REFERENCES Staff(staff_id)
@@ -86,11 +84,11 @@ CREATE TABLE Weekly_Results (
 --    staff_id INT FOREIGN KEY REFERENCES Staff(staff_id)
 --);
 
+
 CREATE TABLE Student (
-    student_id INT NOT NULL IDENTITY PRIMARY KEY,
-    graduated CHAR(1),
     applicant_id INT FOREIGN KEY REFERENCES Applicants(applicant_id),
 --    course_id INT FOREIGN KEY REFERENCES Courses(course_id)
+    graduated CHAR(1)
 );
 
 CREATE TABLE Sparta_Day_Interview (
@@ -139,7 +137,6 @@ TRUNCATE TABLE Student;
 TRUNCATE TABLE Courses;
 TRUNCATE TABLE Weekly_Results;
 TRUNCATE TABLE Applicants;
-TRUNCATE TABLE Streams; 
 TRUNCATE TABLE Staff;
 TRUNCATE TABLE Degree_Grade;
 TRUNCATE TABLE University_Details;
@@ -159,8 +156,7 @@ SELECT * FROM Gender;
 SELECT * FROM City;
 SELECT * FROM University_Details;
 SELECT * FROM Degree_Grade;
-SELECT * FROM Staff;
-SELECT * FROM Streams; 
+SELECT * FROM Staff; 
 SELECT * FROM Courses;
 SELECT * FROM Sparta_Day_Interview; 
 SELECT * FROM Sparta_Day_Assessment; 
