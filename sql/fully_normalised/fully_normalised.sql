@@ -1,5 +1,10 @@
-CREATE DATABASE Sparta_Db;
+USE tempdb
+
+DROP DATABASE Sparta_Db
+CREATE DATABASE Sparta_Db
+
 USE Sparta_Db;
+
 
 CREATE TABLE Behaviours (
     behaviour_id INT NOT NULL IDENTITY PRIMARY KEY,
@@ -44,13 +49,18 @@ CREATE TABLE University_Details (
 CREATE TABLE Degree_Grade (
     degree_grade_id INT NOT NULL IDENTITY PRIMARY KEY,
     classification VARCHAR(20)
-
 );
 
 CREATE TABLE Staff (
     staff_id INT NOT NULL IDENTITY PRIMARY KEY,
     staff_name VARCHAR(100) NOT NULL
 );
+
+CREATE TABLE Streams (
+   stream_id INT NOT NULL IDENTITY PRIMARY KEY,
+   stream_name VARCHAR(20)
+);
+
 
 CREATE TABLE Applicants (
     applicant_id INT NOT NULL IDENTITY PRIMARY KEY,
@@ -60,10 +70,8 @@ CREATE TABLE Applicants (
     email VARCHAR(320),
     city_id INT FOREIGN KEY REFERENCES City(city_id),
     address VARCHAR(MAX),
-
     postcode_area VARCHAR(10),
     phone_number VARCHAR(30),
-
     university_id INT FOREIGN KEY REFERENCES University_Details(university_id),
     degree_grade_id INT FOREIGN KEY REFERENCES Degree_Grade(degree_grade_id),
     staff_id INT FOREIGN KEY REFERENCES Staff(staff_id)
@@ -77,18 +85,19 @@ CREATE TABLE Weekly_Results (
     score INT
 );
 
---CREATE TABLE Courses (
---    course_id INT NOT NULL IDENTITY PRIMARY KEY,
---    course_name VARCHAR(20),
---    stream_id INT FOREIGN KEY REFERENCES Streams(stream_id),
---    staff_id INT FOREIGN KEY REFERENCES Staff(staff_id)
---);
-
+CREATE TABLE Courses (
+    course_id INT NOT NULL IDENTITY PRIMARY KEY,
+    course_name VARCHAR(20),
+    stream_id INT FOREIGN KEY REFERENCES Streams(stream_id),
+    staff_id INT FOREIGN KEY REFERENCES Staff(staff_id)
+);
 
 CREATE TABLE Student (
+    student_id INT NOT NULL IDENTITY PRIMARY KEY,
+    graduated CHAR(1),
     applicant_id INT FOREIGN KEY REFERENCES Applicants(applicant_id),
---    course_id INT FOREIGN KEY REFERENCES Courses(course_id)
-    graduated CHAR(1)
+    stream_id INT FOREIGN KEY REFERENCES Streams(stream_id)
+    -- course_id INT FOREIGN KEY REFERENCES Courses(course_id)
 );
 
 CREATE TABLE Sparta_Day_Interview (
@@ -97,7 +106,7 @@ CREATE TABLE Sparta_Day_Interview (
     geo_flexible BIT,
     financial_support_self BIT,
     result BIT,
---    course_id INT FOREIGN KEY REFERENCES Courses(course_id),
+    -- course_id INT FOREIGN KEY REFERENCES Courses(course_id),
     applicant_id INT FOREIGN KEY REFERENCES Applicants(applicant_id)
 );
 
@@ -107,7 +116,7 @@ CREATE TABLE Sparta_Day_Assessment (
     psychometric_score INT,
     presentation_score INT,
     academy_id INT FOREIGN KEY REFERENCES Academies(academy_id),
-    applicant_id INT FOREIGN KEY REFERENCES Applicants(applicant_id)
+    -- applicant_id INT FOREIGN KEY REFERENCES Applicants(applicant_id)
 );
 
 CREATE TABLE Strength_junction_table (
@@ -128,27 +137,27 @@ CREATE TABLE Talent_Technologies_junction (
 );
 
 
-TRUNCATE TABLE Talent_Technologies_junction; 
-TRUNCATE TABLE Weakness_junction_table;
-TRUNCATE TABLE Strength_junction_table;
-TRUNCATE TABLE Sparta_Day_Assessment;
-TRUNCATE TABLE Sparta_Day_Interview; 
-TRUNCATE TABLE Student;
-TRUNCATE TABLE Courses;
-TRUNCATE TABLE Weekly_Results;
-TRUNCATE TABLE Applicants;
-TRUNCATE TABLE Staff;
-TRUNCATE TABLE Degree_Grade;
-TRUNCATE TABLE University_Details;
-TRUNCATE TABLE City;
-TRUNCATE TABLE Gender;
-TRUNCATE TABLE Weaknesses;
-TRUNCATE TABLE Strengths;
-TRUNCATE TABLE Technologies;
-TRUNCATE TABLE Academies;
-TRUNCATE TABLE Behaviours;
+-- TRUNCATE TABLE Talent_Technologies_junction; 
+-- TRUNCATE TABLE Weakness_junction_table;
+-- TRUNCATE TABLE Strength_junction_table;
+-- TRUNCATE TABLE Sparta_Day_Assessment;
+-- TRUNCATE TABLE Sparta_Day_Interview; 
+-- TRUNCATE TABLE Student;
+-- TRUNCATE TABLE Courses;
+-- TRUNCATE TABLE Weekly_Results;
+-- TRUNCATE TABLE Applicants;
+-- TRUNCATE TABLE Streams; 
+-- TRUNCATE TABLE Staff;
+-- TRUNCATE TABLE Degree_Grade;
+-- TRUNCATE TABLE University_Details;
+-- TRUNCATE TABLE City;
+-- TRUNCATE TABLE Gender;
+-- TRUNCATE TABLE Weaknesses;
+-- TRUNCATE TABLE Strengths;
+-- TRUNCATE TABLE Technologies;
+-- TRUNCATE TABLE Academies;
+-- TRUNCATE TABLE Behaviours;
 
-SELECT * FROM Weekly_Results;
 SELECT * FROM Behaviours;
 SELECT * FROM Student;
 SELECT * FROM Applicants;
@@ -156,8 +165,9 @@ SELECT * FROM Gender;
 SELECT * FROM City;
 SELECT * FROM University_Details;
 SELECT * FROM Degree_Grade;
-SELECT * FROM Staff; 
+SELECT * FROM Staff;
 SELECT * FROM Courses;
+SELECT * FROM Streams;
 SELECT * FROM Sparta_Day_Interview; 
 SELECT * FROM Sparta_Day_Assessment; 
 SELECT * FROM Academies;
