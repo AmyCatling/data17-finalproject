@@ -16,6 +16,7 @@ class LoadData:
             logging.info("Successfully connected to database")
         except:
             logging.error("Failed to connect to database")
+            raise
 
         # Maybe rewritten,
         # Initialising the creation of each table
