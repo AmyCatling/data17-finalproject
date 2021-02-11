@@ -96,8 +96,9 @@ CREATE TABLE Student (
     student_id INT NOT NULL IDENTITY PRIMARY KEY,
     graduated CHAR(1),
     applicant_id INT FOREIGN KEY REFERENCES Applicants(applicant_id),
+
     stream_id INT FOREIGN KEY REFERENCES Streams(stream_id)
-    -- course_id INT FOREIGN KEY REFERENCES Courses(course_id)
+    graduated CHAR(1)
 );
 
 CREATE TABLE Sparta_Day_Interview (
