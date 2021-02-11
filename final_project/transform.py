@@ -157,9 +157,14 @@ class Transform_json:
         weaknesses = []
 
         for index, row in self.talent_df.iterrows():
-            tech.append(str(row.tech_self_score).encode('utf-16'))
-            strengths.append(str(row.strengths).encode('utf-8'))
-            weaknesses.append(str(row.weaknesses).encode('utf-8'))
+            tech.append(str(row.tech_self_score))
+            strengths.append(row.strengths)
+            weaknesses.append(row.weaknesses)
+
+        # for index, row in self.talent_df.iterrows():
+        #     tech.append(str(row.tech_self_score).encode('utf-16'))
+        #     strengths.append(str(row.strengths).encode('utf-8'))
+        #     weaknesses.append(str(row.weaknesses).encode('utf-8'))
 
         self.talent_df['tech_self_score'] = tech
         self.talent_df['strengths'] = strengths

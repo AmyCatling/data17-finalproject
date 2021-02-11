@@ -2,7 +2,7 @@ from final_project.config import *
 import pyodbc
 import pandas as pd
 import logging
-
+import ast
 
 # Class for loading in the data into the database in SQL
 class LoadData:
@@ -82,15 +82,15 @@ class LoadData:
         elif load_choice == 'sparta_day_df':
             self.sparta_day_df = df
             self.import_sparta_day_assessment()
-        elif load_choice == 'talent_df':
-            self.talent_df = df
-            self.import_sparta_day_interview()
-        elif load_choice == 'sparta_day_df':
-            self.sparta_day_df = df
-            self.import_sparta_day_assessment()
 
-        elif load_choice == 'talent_df':
+
+        elif load_choice == 'talent_dff':
             self.talent_df = df
+            # self.talent_df["tech_self_score"] = self.talent_df["tech_self_score"].encode('utf-16')
+            # self.talent_df["weaknesses"] = self.talent_df["weaknesses"].encode('utf-8')
+            # self.talent_df["strengths"] = self.talent_df["strengths"].decode('utf-8')
+            # print(self.strength_list)
+
             self.import_strength_junction_table()
             self.import_weakness_junction_table()
             self.import_talent_technologies_junction_table()
@@ -329,14 +329,17 @@ class LoadData:
 
     def import_strength_junction_table(self):
         for index, row in self.talent_df.iterrows():
-            get_applicant = self.conn.execute("SELECT applicant_id FROM Applicants WHERE applicant_name = ?",
-                                              row["name"])
-            applicant_id = get_applicant.fetchone()[0]
-            for strength in self.talent_df['strengths']:
-                get_strength = self.conn.execute("SELECT strength_id FROM Strengths WHERE strength_name = ?", strength)
-                strength_id = get_strength.fetchone()[0]
-
-                self.conn.execute("INSERT INTO Strength_junction_table (applicant_id, strength_id) VALUES (?,?)", applicant_id, strength_id)
+            print("step 1")
+            for strength in self.talent_df['strengths'][0]:
+                for i in strength:
+                    print(i)
+                    get_strength = self.conn.execute("SELECT strength_id FROM Strengths WHERE strength_name = ?", i)
+                    strength_id = get_strength.fetchone()[0]
+                    print(strength_id)
+                    get_applicant = self.conn.execute("SELECT applicant_id FROM Applicants WHERE LOWER(name) = ?",
+                                                      row["name"].lower())
+                    applicant_id = get_applicant.fetchone()[0]
+                    self.conn.execute("INSERT INTO Strength_junction_table (applicant_id, strength_id) VALUES (?,?)", applicant_id, strength_id)
         self.conn.commit()
 
     def import_weakness_junction_table(self):

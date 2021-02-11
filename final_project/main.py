@@ -16,6 +16,7 @@ def almighty_method():
     loader1 = LoadData(load_choice='academy_df', df=transformer1.academy_df)
     loader2 = LoadData(load_choice='talent_df', df=transformer2.talent_df)
     loader4 = LoadData(load_choice='sparta_day_df', df=transformer4.sparta_day_df)
+    loader2 = LoadData(load_choice='talent_dff', df=transformer2.talent_df)
     
 almighty_method()
 
