@@ -2,6 +2,7 @@ import plotly.express as px
 import pandas as pd
 import pyodbc
 import base64
+import datetime
 
 
 class AppData:
@@ -123,8 +124,8 @@ class AppData:
 
         all = pd.read_sql("""SELECT COUNT(*) AS "Total" FROM Applicants""", self.docker)["Total"][0]
 
-        successful_percentage = round((float(successful) / float(all) * 100), 2)
-        self.successful_percentage_df = pd.DataFrame([successful_percentage])
+        self.successful_percentage = str(round((float(successful) / float(all) * 100), 2)) + '%'
+        self.successful_percentage_df = pd.DataFrame([self.successful_percentage])
         self.successful_percentage_df.columns = ["Percentage of Successful Applicants"]
 
 
@@ -141,13 +142,17 @@ class AppData:
                                            GROUP BY a.degree_grade_id, d.classification
                                             """, self.docker)
     # number of applicants each year
-    def get_annual_applicants_df(self):
-        self.annual_applicants_df = pd.read_sql("""
-                                                SELECT YEAR(sparta_day_date) AS "Year", 
-                                                COUNT(YEAR(sparta_day_date)) AS "Number of Applicants"
+    def get_monthly_applicants_df(self):
+        self.monthly_applicants_df = pd.read_sql("""
+                                                SELECT MONTH(sparta_day_date) AS "Month", 
+                                                COUNT(MONTH(sparta_day_date)) AS "Number of Applicants"
                                                 FROM Sparta_day_assessment 
-                                                GROUP BY YEAR(sparta_day_date)
+                                                GROUP BY MONTH(sparta_day_date)
                                                 """, self.docker)
+        months = []
+        for month in self.monthly_applicants_df['Month']:
+            months.append(datetime.datetime.strptime(str(month), "%m").strftime("%b"))
+        self.monthly_applicants_df['Month'] = months
 
     # avg psychometric and pres scores for successful applicants
     def get_avg_psy_pres_scores_df(self):
@@ -160,12 +165,14 @@ class AppData:
                                     WHERE i.result=1
                                     """, self.docker)
 
-        self.scores_df = self.scores_df.T
 
-        self.scores_df.columns = ["Average Score"]
-        self.scores_df['Assessment'] = ['Psychometric', 'Presentation']
 
-        self.scores_df = self.scores_df[["Assessment", "Average Score"]]
+        # self.scores_df = self.scores_df.T
+        #
+        # self.scores_df.columns = ["Average Score"]
+        # self.scores_df['Assessment'] = ['Psychometric', 'Presentation']
+        #
+        # self.scores_df = self.scores_df[["Assessment", "Average Score"]]
 
 
 
@@ -180,6 +187,45 @@ class AppData:
                                             WHERE c.course_name = '{self.chosen_course}'
                                             GROUP BY c.course_name, s.staff_name
                                             """, self.docker)
+
+        # percentage of students that have graduated
+        # number_graduated = pd.read_sql(f"""
+        #                                 SELECT COUNT(*) AS "Count"
+        #                                 FROM Courses c
+        #                                 JOIN Students s ON s.course_id = c.course_id
+        #                                 WHERE  c.course_name = '{self.chosen_course}' AND s.graduated = "y"
+        #                                 """, self.docker)["Count"][0]
+        # all = pd.read_sql(f"""
+        #                     SELECT COUNT(*) AS "Count"
+        #                     FROM Students s
+        #                     JOIN Courses c ON c.course_id = s.course_id
+        #                     WHERE c.course_name = '{self.chosen_course}'
+        #                 """)
+        # percentage_graduated = str(round((float(number_graduated)/float(all)*100), 2)) + '%'
+        # self.course_info_df["Percentage of Graduated Trainees"] = percentage_graduated
+
+        # need to add course start date and end date
+
+
+
+
+    def get_combo_table(self):
+
+        self.scores_df["Percentage of Applicants Accepted"] = [self.successful_percentage]
+        self.scores_df.columns = ["Average Psychometric Test Score", "Average Presentation Score", "Percentage of Applicants Accepted"]
+        # print(self.scores_df)
+
+        # percentage who complete the course
+        # graduated = pd.read_sql("""
+        #             SELECT COUNT(*) AS "Count" FROM STUDENTS
+        #             WHERE Graduated = "y"
+        #             """, self.docker)['Count'][0]
+        #
+        # all = pd.read_sql("""SELECT COUNT(*) FROM Students AS "Count" """, self.docker)['Count'][0]
+        # graduated_percentage = round((float(graduated)/float(all) * 100), 2)
+        # self.scores_df["Percentage of Trainees who Graduate"] = [graduated_percentage]
+
+
 
 
 
@@ -196,7 +242,7 @@ if __name__ == '__main__':
     t.get_avg_psy_pres_scores_df()
     t.get_successful_applicants()
     t.get_course_table()
-
+    t.get_combo_table()
 
 
 
