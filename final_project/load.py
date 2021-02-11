@@ -68,7 +68,7 @@ class LoadData:
             #load_choice == 'score'
            # self.score_list = df
 
-            self.import_weekly_results()
+        #    self.import_weekly_results()
         # elif load_choice == 'academy_df':
         #     self.academy_df = df
         #     self.import_courses()
@@ -247,9 +247,9 @@ class LoadData:
             self.conn.commit()
 
 
-    def import_weekly_results(self):
-        print(self.behaviours_list)
-        print(self.week_number_list)
+    # def import_weekly_results(self):
+    #     print(self.behaviours_list)
+    #     print(self.week_number_list)
         # print(self.score_list)
     #             for index, row in self.applicant_df.iterrows():
     #         self.applicant_df = df
@@ -316,10 +316,7 @@ class LoadData:
     def import_sparta_day_assessment(self):
         for index, row in self.sparta_day_df.iterrows():
             get_academy = self.conn.execute("SELECT academy_id FROM Academies WHERE academy_location = ?", row.academy)
-            print("we have reached this point...")
             academy_id = get_academy.fetchone()[0]
-            print(academy_id)
-            print("placeholder")
             # get_applicant = self.conn.execute("SELECT applicant_id FROM Applicants WHERE UPPER(name) = ?", row["name"].upper())
             # print(get_applicant.fetchone()[0])
             # applicant_id = get_applicant.fetchone()[0]
@@ -330,16 +327,19 @@ class LoadData:
         self.conn.commit()
 
     def import_strength_junction_table(self):
-        for index, row in self.talent_df:
-            get_strength = self.conn.execute("SELECT strength_id FROM Strengths WHERE strength_name = ?", row.strength)
-            strength_id = get_strength.fetchone()[0]
-            get_applicant = self.conn.execute("SELECT applicant_id FROM Applicants WHERE applicant_name = ?", row["name"])
+        for index, row in self.talent_df.iterrows():
+            get_applicant = self.conn.execute("SELECT applicant_id FROM Applicants WHERE applicant_name = ?",
+                                              row["name"])
             applicant_id = get_applicant.fetchone()[0]
-            self.conn.execute("INSERT INTO Strength_junction_table (applicant_id, strength_id) VALUES (?,?)", applicant_id, strength_id)
+            for strength in self.talent_df['strengths']:
+                get_strength = self.conn.execute("SELECT strength_id FROM Strengths WHERE strength_name = ?", strength)
+                strength_id = get_strength.fetchone()[0]
+
+                self.conn.execute("INSERT INTO Strength_junction_table (applicant_id, strength_id) VALUES (?,?)", applicant_id, strength_id)
         self.conn.commit()
 
     def import_weakness_junction_table(self):
-        for index, row in self.talent_df:
+        for index, row in self.talent_df.iterrows():
             get_weakness = self.conn.execute("SELECT weakness_id FROM Weaknesses WHERE weakness_name = ?", row.weakness)
             weakness_id = get_weakness.fetchone()[0]
             get_applicant = self.conn.execute("SELECT applicant_id FROM Applicants WHERE applicant_name = ?", row["name"])
@@ -348,7 +348,7 @@ class LoadData:
         self.conn.commit()
 
     def import_talent_technologies_junction_table(self):
-        for index, row in self.talent_df:
+        for index, row in self.talent_df.iterrows():
             get_technology = self.conn.execute("SELECT technology_id FROM Technologies WHERE skill_name = ?", row.weakness)
             technology_id = get_technology.fetchone()[0]
             get_applicant = self.conn.execute("SELECT applicant_id FROM Applicants WHERE applicant_name = ?", row["name"])

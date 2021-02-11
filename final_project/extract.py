@@ -106,8 +106,6 @@ class Extract:
             file_obj = s3_object['Body']
             df = pd.read_csv(file_obj)
 
-
-
             df.insert(0, 'original_file_name', file)
             df.insert(1, 'course_name', (file.split('/')[1]).rsplit('_', 1)[0])
             df.insert(2, 'date', ((file.split('/')[1]).rsplit('_', 1)[1]).split('.')[0])
